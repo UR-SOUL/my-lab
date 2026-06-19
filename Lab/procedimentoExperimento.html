@@ -1,0 +1,614 @@
+<!doctype html>
+
+<html class="light" lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Laboratório Químico Virtual - Procedimento</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffffff",
+              error: "#ba1a1a",
+              "on-error-container": "#93000a",
+              outline: "#74777d",
+              "surface-dim": "#dadada",
+              surface: "#f9f9f9",
+              primary: "#000000",
+              "on-primary-fixed-variant": "#3a4859",
+              "secondary-container": "#62fb9f",
+              "on-background": "#1a1c1c",
+              tertiary: "#000000",
+              secondary: "#006d3b",
+              "surface-bright": "#f9f9f9",
+              "secondary-fixed-dim": "#43e188",
+              "on-surface": "#1a1c1c",
+              "surface-container-highest": "#e2e2e2",
+              "on-primary-fixed": "#0f1c2c",
+              "primary-fixed": "#d6e4f9",
+              "primary-container": "#0f1c2c",
+              "on-secondary-fixed": "#00210e",
+              "inverse-primary": "#bac8dc",
+              "secondary-fixed": "#66fea2",
+              "surface-tint": "#525f71",
+              "on-secondary-container": "#00723e",
+              "on-secondary-fixed-variant": "#00522b",
+              "on-tertiary-fixed": "#1a1c1a",
+              background: "#f9f9f9",
+              "inverse-on-surface": "#f0f1f1",
+              "on-tertiary-fixed-variant": "#454745",
+              "on-surface-variant": "#44474c",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "surface-container": "#eeeeee",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#e2e3df",
+              "surface-variant": "#e2e2e2",
+              "on-tertiary-container": "#828481",
+              "tertiary-container": "#1a1c1a",
+              "tertiary-fixed-dim": "#c6c7c3",
+              "surface-container-high": "#e8e8e8",
+              "surface-container-lowest": "#ffffff",
+              "outline-variant": "#c4c6cc",
+              "surface-container-low": "#f3f3f4",
+              "primary-fixed-dim": "#bac8dc",
+              "on-primary-container": "#778598",
+              "inverse-surface": "#2f3131",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              md: "24px",
+              sm: "12px",
+              base: "8px",
+              gutter: "24px",
+              lg: "40px",
+              "container-max": "1280px",
+              xl: "64px",
+              xs: "4px",
+            },
+            fontFamily: {
+              "display-lg": ["Inter"],
+              "headline-lg": ["Inter"],
+              "body-sm": ["Inter"],
+              "body-lg": ["Inter"],
+              "label-caps": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "title-md": ["Inter"],
+            },
+            fontSize: {
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                { lineHeight: "40px", fontWeight: "600" },
+              ],
+              "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+              "label-caps": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.05em",
+                  fontWeight: "700",
+                },
+              ],
+              "headline-lg-mobile": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "title-md": ["20px", { lineHeight: "28px", fontWeight: "500" }],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background text-on-background antialiased overflow-hidden">
+    <!-- TopNavBar -->
+    <nav
+      class="bg-surface dark:bg-inverse-surface shadow-sm border-b border-outline-variant dark:border-outline fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter h-16"
+    >
+      <div class="flex items-center gap-sm">
+        <span
+          class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer active:scale-95 hover:bg-surface-container-high transition-colors p-2 rounded-full"
+          >menu</span
+        >
+        <span
+          class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed hidden md:block"
+          >Laboratório Químico Virtual</span
+        >
+        <span
+          class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary dark:text-primary-fixed md:hidden"
+          >LQV</span
+        >
+      </div>
+      <div class="flex items-center gap-sm">
+        <span
+          class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer active:scale-95 hover:bg-surface-container-high transition-colors p-2 rounded-full"
+          >account_circle</span
+        >
+        <span
+          class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer active:scale-95 hover:bg-surface-container-high transition-colors p-2 rounded-full"
+          >help</span
+        >
+      </div>
+    </nav>
+    <!-- Main Layout Container -->
+    <div class="flex pt-16 h-screen w-full">
+      <!-- Left SideNavBar (Navegação Acadêmica) -->
+      <aside
+        class="bg-surface-container-low dark:bg-surface-container-lowest shadow-md fixed left-0 top-16 h-[calc(100vh-64px)] z-40 p-4 w-64 hidden md:flex flex-col"
+      >
+        <div class="mb-lg px-2">
+          <h2 class="font-headline-lg text-headline-lg text-primary text-xl">
+            Menu Principal
+          </h2>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">
+            Navegação Acadêmica
+          </p>
+        </div>
+        <ul class="flex flex-col gap-base">
+          <li>
+            <a
+              class="flex items-center gap-sm p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-body-lg text-body-lg"
+              href="teoriaReaceosOrganicas.html"
+            >
+              <span class="material-symbols-outlined">menu_book</span> Teoria
+            </a>
+          </li>
+          <li>
+            <!-- ACTIVE STATE -->
+            <a
+              class="flex items-center gap-sm p-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-body-lg text-body-lg"
+              href="procedimentoExperimento.html"
+            >
+              <span class="material-symbols-outlined"
+                >format_list_numbered</span
+              >
+              Procedimento
+            </a>
+          </li>
+          <li>
+            <a
+              class="flex items-center gap-sm p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-body-lg text-body-lg"
+              href="simuladorInterativo.html"
+            >
+              <span class="material-symbols-outlined">science</span> Simulador
+            </a>
+          </li>
+          <li>
+            <a
+              class="flex items-center gap-sm p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg hover:bg-surface-container-highest transition-all duration-200 ease-in-out font-body-lg text-body-lg"
+              href="resultadoExperimento.html"
+            >
+              <span class="material-symbols-outlined">analytics</span> Resultado
+            </a>
+          </li>
+        </ul>
+      </aside>
+      <!-- Right SideNavBar (Inventário) - Hidden on mobile, visible on large screens as requested by "mesmo layout" -->
+      <aside
+        class="bg-surface dark:bg-surface-container shadow-sm border-l border-outline-variant fixed right-0 top-16 h-[calc(100vh-64px)] z-30 flex-col w-72 hidden xl:flex"
+      >
+        <div class="p-md border-b border-outline-variant/50">
+          <h2 class="font-title-md text-title-md text-primary">Inventário</h2>
+          <p
+            class="font-body-sm text-body-sm text-on-surface-variant opacity-70"
+          >
+            Materiais de Bancada
+          </p>
+        </div>
+        <ul class="flex flex-col py-sm">
+          <li
+            class="py-2 cursor-pointer hover:bg-surface-container-high transition-colors"
+          >
+            <span
+              class="flex items-center gap-sm text-on-surface-variant opacity-70 pl-3 font-label-caps text-label-caps hover:text-primary transition-opacity"
+            >
+              <span class="material-symbols-outlined">bia</span> Vidrarias
+            </span>
+          </li>
+          <li
+            class="py-2 cursor-pointer hover:bg-surface-container-high transition-colors"
+          >
+            <span
+              class="flex items-center gap-sm text-on-surface-variant opacity-70 pl-3 font-label-caps text-label-caps hover:text-primary transition-opacity"
+            >
+              <span class="material-symbols-outlined">opacity</span> Reagentes
+            </span>
+          </li>
+          <li
+            class="py-2 cursor-pointer hover:bg-surface-container-high transition-colors"
+          >
+            <span
+              class="flex items-center gap-sm text-on-surface-variant opacity-70 pl-3 font-label-caps text-label-caps hover:text-primary transition-opacity"
+            >
+              <span class="material-symbols-outlined"
+                >precision_manufacturing</span
+              >
+              Equipamentos
+            </span>
+          </li>
+        </ul>
+      </aside>
+      <!-- Main Content Area -->
+      <main
+        class="flex-1 overflow-y-auto w-full md:ml-64 xl:mr-72 pb-xl bg-surface-bright relative"
+      >
+        <!-- Decorative background pattern for a clean, modern feel -->
+        <div
+          class="absolute inset-0 pointer-events-none opacity-5"
+          style="
+            background-image: radial-gradient(
+              circle at 1px 1px,
+              #1a1c1c 1px,
+              transparent 0
+            );
+            background-size: 24px 24px;
+          "
+        ></div>
+        <div class="max-w-container-max mx-auto px-gutter py-lg relative z-10">
+          <!-- Header Section -->
+          <div class="mb-lg">
+            <button
+              class="flex items-center gap-xs text-on-surface-variant font-body-sm text-body-sm hover:text-primary transition-colors border border-outline-variant/50 rounded-full px-4 py-2 mb-md bg-surface/50 backdrop-blur-sm"
+              onclick="window.location.href='teoriaReaceosOrganicas.html'"
+            >
+              <span class="material-symbols-outlined text-[18px]"
+                >arrow_back</span
+              >
+              Voltar para Teoria
+            </button>
+            <h1
+              class="font-display-lg text-display-lg text-primary mb-sm md:text-[48px] text-[32px]"
+            >
+              Roteiro do Experimento
+            </h1>
+            <p
+              class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl"
+            >
+              Siga atentamente as instruções abaixo. A precisão na medição e o
+              uso correto dos equipamentos são fundamentais para o sucesso desta
+              prática laboratorial.
+            </p>
+          </div>
+          <!-- Bento Grid Layout for Content -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
+            <!-- Left Column (Requirements) -->
+            <div class="lg:col-span-4 flex flex-col gap-md">
+              <!-- Reagentes Card -->
+              <div
+                class="bg-surface/80 backdrop-blur-md border border-outline-variant shadow-sm rounded-xl p-md"
+              >
+                <div
+                  class="flex items-center gap-sm mb-4 border-b border-outline-variant/50 pb-2"
+                >
+                  <span class="material-symbols-outlined text-secondary"
+                    >opacity</span
+                  >
+                  <h2 class="font-title-md text-title-md text-primary">
+                    Reagentes Usados
+                  </h2>
+                </div>
+                <ul class="space-y-3 font-body-sm text-body-sm text-on-surface">
+                  <li
+                    class="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg border border-outline-variant/30"
+                  >
+                    <div
+                      class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold font-label-caps text-label-caps shrink-0"
+                    >
+                      H₂O
+                    </div>
+                    <div>
+                      <p class="font-bold">Água Destilada</p>
+                      <p class="text-on-surface-variant text-[12px]">
+                        Solvente universal (500ml)
+                      </p>
+                    </div>
+                  </li>
+                  <li
+                    class="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg border border-outline-variant/30"
+                  >
+                    <div
+                      class="w-8 h-8 rounded bg-error/10 flex items-center justify-center text-error font-bold font-label-caps text-label-caps shrink-0"
+                    >
+                      HCl
+                    </div>
+                    <div>
+                      <p class="font-bold">Ácido Clorídrico 0.1M</p>
+                      <p class="text-on-surface-variant text-[12px]">
+                        Solução ácida padrão (50ml)
+                      </p>
+                      <span
+                        class="inline-block mt-1 bg-error-container text-on-error-container text-[10px] px-2 py-0.5 rounded-full font-bold"
+                        >Corrosivo</span
+                      >
+                    </div>
+                  </li>
+                  <li
+                    class="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg border border-outline-variant/30"
+                  >
+                    <div
+                      class="w-8 h-8 rounded bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold font-label-caps text-label-caps shrink-0"
+                    >
+                      NaOH
+                    </div>
+                    <div>
+                      <p class="font-bold">Hidróxido de Sódio 0.1M</p>
+                      <p class="text-on-surface-variant text-[12px]">
+                        Titulante (50ml)
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <!-- Materiais Card -->
+              <div
+                class="bg-surface/80 backdrop-blur-md border border-outline-variant shadow-sm rounded-xl p-md"
+              >
+                <div
+                  class="flex items-center gap-sm mb-4 border-b border-outline-variant/50 pb-2"
+                >
+                  <span class="material-symbols-outlined text-secondary"
+                    >bia</span
+                  >
+                  <h2 class="font-title-md text-title-md text-primary">
+                    Materiais Necessários
+                  </h2>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div
+                    class="border border-outline-variant/40 rounded-lg p-2 flex flex-col items-center justify-center text-center bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-default"
+                  >
+                    <span
+                      class="material-symbols-outlined text-outline mb-1 text-[28px] stroke-[1.5px]"
+                      >science</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-on-surface text-[12px]"
+                      >Béquer 250ml</span
+                    >
+                  </div>
+                  <div
+                    class="border border-outline-variant/40 rounded-lg p-2 flex flex-col items-center justify-center text-center bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-default"
+                  >
+                    <span
+                      class="material-symbols-outlined text-outline mb-1 text-[28px] stroke-[1.5px]"
+                      >experiment</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-on-surface text-[12px]"
+                      >Erlenmeyer 100ml</span
+                    >
+                  </div>
+                  <div
+                    class="border border-outline-variant/40 rounded-lg p-2 flex flex-col items-center justify-center text-center bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-default"
+                  >
+                    <span
+                      class="material-symbols-outlined text-outline mb-1 text-[28px] stroke-[1.5px]"
+                      >straighten</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-on-surface text-[12px]"
+                      >Bureta 50ml</span
+                    >
+                  </div>
+                  <div
+                    class="border border-outline-variant/40 rounded-lg p-2 flex flex-col items-center justify-center text-center bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-default"
+                  >
+                    <span
+                      class="material-symbols-outlined text-outline mb-1 text-[28px] stroke-[1.5px]"
+                      >colorize</span
+                    >
+                    <span
+                      class="font-body-sm text-body-sm text-on-surface text-[12px]"
+                      >Pipeta Volumétrica</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right Column (Step by Step) -->
+            <div class="lg:col-span-8">
+              <div
+                class="bg-surface/90 backdrop-blur-md border border-outline-variant shadow-sm rounded-xl p-lg h-full"
+              >
+                <div
+                  class="flex items-center justify-between mb-6 border-b border-outline-variant/50 pb-3"
+                >
+                  <div class="flex items-center gap-sm">
+                    <span
+                      class="material-symbols-outlined text-primary text-[28px]"
+                      >format_list_numbered</span
+                    >
+                    <h2
+                      class="font-headline-lg text-headline-lg text-primary text-[24px]"
+                    >
+                      Guia Passo a Passo
+                    </h2>
+                  </div>
+                  <button
+                    class="bg-primary text-on-primary font-body-sm text-body-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+                    onclick="window.location.href='simuladorInterativo.html'"
+                  >
+                    Iniciar Simulação
+                    <span class="material-symbols-outlined text-[18px]"
+                      >play_arrow</span
+                    >
+                  </button>
+                </div>
+                <div
+                  class="relative border-l-2 border-surface-container-high ml-4 space-y-8 pb-4"
+                >
+                  <!-- Step 1 -->
+                  <div class="relative pl-8">
+                    <div
+                      class="absolute -left-[17px] top-0 w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold font-body-sm text-body-sm ring-4 ring-surface shadow-sm"
+                    >
+                      1
+                    </div>
+                    <h3
+                      class="font-title-md text-title-md text-primary mb-2 mt-1"
+                    >
+                      Preparação da Bancada
+                    </h3>
+                    <p
+                      class="font-body-lg text-body-lg text-on-surface-variant mb-3"
+                    >
+                      Certifique-se de que a bancada virtual está limpa.
+                      Posicione o suporte universal no centro e fixe a garra
+                      metálica que irá segurar a bureta.
+                    </p>
+                  </div>
+                  <!-- Step 2 -->
+                  <div class="relative pl-8">
+                    <div
+                      class="absolute -left-[17px] top-0 w-8 h-8 rounded-full bg-surface-container-highest text-primary border border-outline-variant flex items-center justify-center font-bold font-body-sm text-body-sm ring-4 ring-surface"
+                    >
+                      2
+                    </div>
+                    <h3
+                      class="font-title-md text-title-md text-primary mb-2 mt-1"
+                    >
+                      Preparo do Titulante
+                    </h3>
+                    <p
+                      class="font-body-lg text-body-lg text-on-surface-variant mb-3"
+                    >
+                      Utilizando um funil pequeno, preencha a bureta de 50ml com
+                      a solução de
+                      <strong>Hidróxido de Sódio (NaOH) 0.1M</strong>. Zere a
+                      bureta com cuidado, garantindo que não haja bolhas de ar
+                      na ponta.
+                    </p>
+                    <div
+                      class="bg-surface-container p-4 rounded-lg flex gap-4 items-center border border-outline-variant/30"
+                    >
+                      <span
+                        class="material-symbols-outlined text-outline text-[32px]"
+                        >warning</span
+                      >
+                      <p
+                        class="font-body-sm text-body-sm text-on-surface-variant italic"
+                      >
+                        Atenção: A leitura do menisco deve ser feita na altura
+                        dos olhos.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Step 3 -->
+                  <div class="relative pl-8">
+                    <div
+                      class="absolute -left-[17px] top-0 w-8 h-8 rounded-full bg-surface-container-highest text-primary border border-outline-variant flex items-center justify-center font-bold font-body-sm text-body-sm ring-4 ring-surface"
+                    >
+                      3
+                    </div>
+                    <h3
+                      class="font-title-md text-title-md text-primary mb-2 mt-1"
+                    >
+                      Preparo da Amostra
+                    </h3>
+                    <p
+                      class="font-body-lg text-body-lg text-on-surface-variant mb-3"
+                    >
+                      Com a pipeta volumétrica, meça exatamente 20ml da solução
+                      de <strong>Ácido Clorídrico (HCl)</strong> e transfira
+                      para o Erlenmeyer. Adicione 3 gotas do indicador
+                      fenolftaleína.
+                    </p>
+                    <!-- Image placeholder showcasing a visual prompt for the step -->
+                    <div
+                      class="bg-cover bg-center w-full h-48 rounded-lg border border-outline-variant/50 mt-4 shadow-sm"
+                      data-alt="A macro shot of a glass Erlenmeyer flask on a pristine white laboratory bench. Inside the flask is a clear liquid. A glass pipette is positioned above it, dispensing exactly three glowing pink drops of phenolphthalein indicator. The lighting is bright, sterile, and professional, characteristic of a high-end modern science lab in light mode. Deep navy blue out-of-focus background elements add contrast."
+                      style="
+                        background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDwulxMUy0qrj05DUb_YHkYDI_XxOMSRfFfRVahWRuqL8K8Q-_aMga9v0V4ZU75MRXxEqoAaSDk7fJHL1FTevxG-lZgmK5WWkGegJB0eUoHafkVH3mwK2vo2YTSPrw6k0uLt6g7DFoarXtro2d-MK8xD_maF3e3Q98_hJKzUngXg3Bom7xkSJ901hsOuip4aBAHnWMWcdtZzB7oK0n25fOF11-OEpx9-n_0PYJHOPW6cNTzhz6wJoc9JzrC_ojTfmCoiuvkxOLFW4U0&quot;);
+                      "
+                    ></div>
+                  </div>
+                  <!-- Step 4 -->
+                  <div class="relative pl-8">
+                    <div
+                      class="absolute -left-[17px] top-0 w-8 h-8 rounded-full bg-surface-container-highest text-primary border border-outline-variant flex items-center justify-center font-bold font-body-sm text-body-sm ring-4 ring-surface"
+                    >
+                      4
+                    </div>
+                    <h3
+                      class="font-title-md text-title-md text-primary mb-2 mt-1"
+                    >
+                      Titulação
+                    </h3>
+                    <p
+                      class="font-body-lg text-body-lg text-on-surface-variant mb-3"
+                    >
+                      Posicione o Erlenmeyer sob a bureta. Abra a torneira
+                      lentamente, gotejando o NaOH sobre o HCl sob agitação
+                      constante. Pare imediatamente quando a solução adquirir
+                      uma coloração rosa persistente (ponto de viragem).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- Footer -->
+    <footer
+      class="bg-surface-container-highest dark:bg-surface-container-low border-t border-outline-variant fixed bottom-0 left-0 w-full z-50 px-gutter py-2 flex justify-between items-center bg-opacity-90 backdrop-blur-sm"
+    >
+      <div class="font-label-caps text-label-caps text-on-surface-variant">
+        © 2024 Laboratório Químico Virtual - Ambiente de Experimentação Seguro
+      </div>
+      <div class="flex gap-md font-body-sm text-body-sm">
+        <a
+          class="text-on-surface-variant hover:underline transition-all"
+          href="#"
+          >Suporte</a
+        >
+        <a
+          class="text-on-surface-variant hover:underline transition-all"
+          href="#"
+          >Documentação GHS</a
+        >
+      </div>
+    </footer>
+  </body>
+</html>
