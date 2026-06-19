@@ -373,6 +373,20 @@
 				"default": "#E0E0E0"
 			};
 
+			const reagentStates = {
+				"metano": "gas", "cloro": "gas", "etileno": "gas", "bromo": "gas",
+				"água": "liquido", "hidróxido": "liquido", "2-bromobutano": "liquido", "etanol": "liquido", "gasolina": "liquido",
+				"ferro": "solido", "parafina": "solido"
+			};
+
+			function getReagentState(name) {
+				const lowName = (name || "").toLowerCase();
+				for (const key in reagentStates) {
+					if (lowName.includes(key)) return reagentStates[key];
+				}
+				return "liquido";
+			}
+
 			function getReagentColor(name) {
 				const lowName = name.toLowerCase();
 				for (const key in reagentColors) {
@@ -381,14 +395,52 @@
 				return reagentColors.default;
 			}
 
-			function drawGlassware(type, fillPct, color, itemW) {
+			function drawEquipment(type, itemW) {
+				let paths = "";
+				if (type.includes("Bunsen")) {
+					paths = `
+						<path d="M 20,75 L 50,75 L 50,80 L 20,80 Z" fill="#444" />
+						<path d="M 33,50 L 37,50 L 37,75 L 33,75 Z" fill="#777" />
+						<path d="M 30,50 L 40,50 L 35,45 Z" fill="#555" />
+						<path class="active-flame-svg" d="M 35,45 Q 30,35 35,25 Q 40,35 35,45" fill="#ff9800" opacity="0.8" />
+					`;
+				} else if (type.includes("Suporte")) {
+					paths = `
+						<path d="M 15,78 L 55,78 L 55,80 L 15,80 Z" fill="#333" />
+						<path d="M 25,10 L 27,10 L 27,78 L 25,78 Z" fill="#666" />
+						<path d="M 27,30 L 45,30 L 45,35 L 27,35 Z" fill="#555" />
+						<path d="M 45,25 L 48,25 Q 52,32 48,40 L 45,40 Z" fill="#444" fill-rule="evenodd" />
+					`;
+				} else if (type.includes("Agitador")) {
+					paths = `
+						<rect x="15" y="60" width="40" height="20" rx="3" fill="#eee" stroke="#ccc" />
+						<rect x="17" y="62" width="36" height="5" fill="#ddd" />
+						<circle cx="25" cy="73" r="3" fill="#777" />
+						<circle cx="35" cy="73" r="3" fill="#777" />
+					`;
+				} else if (type.includes("Balança")) {
+					paths = `
+						<rect x="15" y="65" width="40" height="12" rx="2" fill="#555" />
+						<rect x="20" y="58" width="30" height="7" rx="1" fill="#bbb" />
+						<rect x="30" y="70" width="10" height="4" fill="#000" />
+						<text x="31" y="73" fill="#0f0" font-size="3" font-family="monospace">0.00</text>
+					`;
+				}
+				return `<svg width="${itemW}" height="100" viewBox="0 0 70 90">${paths}</svg>`;
+			}
+
+			function drawGlassware(type, fillPct, color, itemW, state = "liquido") {
 				const height = 80;
 				const liquidHeight = (fillPct / 100) * (height - 10);
-				const colorFiltered = color === "transparent" ? "rgba(255,255,255,0.05)" : color;
+				let colorFiltered = color === "transparent" ? "rgba(255,255,255,0.05)" : color;
+				
+				let fillOpacity = 1;
+				if (state === "gas") fillOpacity = 0.5;
 
 				let path = "";
 				let clipPath = "";
-
+				let contentVisual = "";
+				
 				if (type.includes("Becker")) {
 					path = `M 15,5 L 15,75 Q 15,80 20,80 L 50,80 Q 55,80 55,75 L 55,5 L 50,5 L 50,7 M 15,5 L 10,2 L 15,7`;
 					clipPath = `M 15,5 L 15,80 L 55,80 L 55,5 Z`;
@@ -414,6 +466,14 @@
 
 				const id = type.replace(/[^a-zA-Z]/g, '') + Math.floor(Math.random() * 1000);
 
+				if (state === "solido" && fillPct > 0) {
+					contentVisual = `<path d="M 25,80 Q 35,65 45,80 Z" fill="${colorFiltered}" />`;
+				} else {
+					contentVisual = `<rect x="0" y="${80 - liquidHeight}" width="70" height="${liquidHeight + 10}" 
+							  fill="${colorFiltered}" fill-opacity="${fillOpacity}" clip-path="url(#clip-${id})" 
+							  class="${state === 'liquido' ? 'liquid-fill' : ''}" />`;
+				}
+
 				return `
 					<svg width="${itemW}" height="100" viewBox="0 0 70 90" class="glassware-svg overflow-visible drop-shadow-sm">
 						<defs>
@@ -427,9 +487,7 @@
 							</linearGradient>
 						</defs>
 						<ellipse cx="35" cy="82" rx="22" ry="4" fill="rgba(0,0,0,0.08)" />
-						<rect x="0" y="${80 - liquidHeight}" width="70" height="${liquidHeight + 10}" 
-							  fill="${colorFiltered}" clip-path="url(#clip-${id})" 
-							  class="liquid-fill" />
+						${contentVisual}
 						<path d="${path}" fill="url(#grad-${id})" stroke="rgba(200,220,255,0.5)" stroke-width="1.5" />
 						<path d="M 22,20 L 22,40" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" />
 					</svg>
@@ -437,9 +495,22 @@
 			}
 
 			function getBenchItemVisual(item) {
+				if (item.type === "equipment") {
+					return drawEquipment(item.name, 80);
+				}
+				
 				let fillPct = (item.volume / item.maxVolume) * 100;
-				if (item.type === "reagent") fillPct = 75; // Reagente sempre visualmente cheio (75%)
-				return drawGlassware(item.name || "Reagente", fillPct, item.liquidColor, 80);
+				let state = "liquido";
+				
+				if (item.type === "reagent") {
+					fillPct = 75;
+					state = getReagentState(item.name);
+				} else if (item.contents.length > 0) {
+					if (item.contents.some(c => getReagentState(c) === "solido")) state = "solido";
+					if (item.contents.some(c => getReagentState(c) === "gas")) state = "gas";
+				}
+				
+				return drawGlassware(item.name || "Reagente", fillPct, item.liquidColor, 80, state);
 			}
 
 			items.forEach((item) => {
@@ -587,7 +658,7 @@
 
 				if (source.volume <= 0 && source.type !== "reagent") return;
 				if (target.volume >= target.maxVolume) {
-					statusText.innerHTML = "⚠️ Capacidade máxima atingida";
+					statusText.innerHTML = "AVISO: Capacidade máxima atingida";
 					return;
 				}
 
@@ -668,7 +739,7 @@
 
 				if (isNaN(val) || val <= 0) return;
 				if (val > max) {
-					warning.innerText = `⚠️ Só é possível adicionar até ${max.toFixed(0)}${target.unit || 'ml'} — capacidade máxima da vidraria.`;
+					warning.innerText = `AVISO: Só é possível adicionar até ${max.toFixed(0)}${target.unit || 'ml'} — capacidade máxima da vidraria.`;
 					warning.classList.remove("hidden");
 					return;
 				}
@@ -943,7 +1014,7 @@
 								statusText.innerHTML = "Status: REAÇÃO CONCLUÍDA — Substituição: CH₄ + Cl₂ → CH₃Cl + HCl";
 							}, 3000);
 						} else {
-							statusText.innerHTML = "⚠️ Esta vidraria não é adequada para este tipo de reação.";
+							statusText.innerHTML = "AVISO: Esta vidraria não é adequada para este tipo de reação.";
 						}
 						return;
 					}
@@ -952,18 +1023,18 @@
 					if (reagents.some(r => r.includes("2-bromobutano")) && reagents.some(r => r.includes("NaOH"))) {
 						reactionFound = true;
 						if (!item.name.includes("Balão") || !hasCondensador) {
-							statusText.innerHTML = "⚠️ Esta vidraria não é adequada para este tipo de reação. Requer Balão de fundo redondo e Condensador (Liebig).";
+							statusText.innerHTML = "AVISO: Esta vidraria não é adequada para este tipo de reação. Requer Balão de fundo redondo e Condensador (Liebig).";
 							return;
 						}
 						if (!hasBunsen && !hasAgitador && currentTemp < 60) {
-							statusText.innerHTML = "⚠️ Reagentes presentes, mas falta uma fonte de calor (Bico de Bunsen ou Agitador com aquecimento) para iniciar a reação.";
+							statusText.innerHTML = "AVISO: Reagentes presentes, mas falta uma fonte de calor (Bico de Bunsen ou Agitador com aquecimento) para iniciar a reação.";
 							return;
 						}
 
 						const concentration = parseFloat(document.getElementById("concentration-slider").value);
 						let duration = 3000;
 						if (concentration < 1.0) {
-							statusText.innerHTML = "⚠️ Concentração baixa — a reação será mais lenta (mecanismo E1 favorecido).";
+							statusText.innerHTML = "AVISO: Concentração baixa — a reação será mais lenta (mecanismo E1 favorecido).";
 							duration = 6000;
 						} else {
 							statusText.innerHTML = "Status: REAÇÃO EM ANDAMENTO...";
@@ -993,7 +1064,7 @@
 								statusText.innerHTML = "Status: REAÇÃO CONCLUÍDA — Adição: C₂H₄ + Br₂ → C₂H₄Br₂";
 							}, duration);
 						} else {
-							statusText.innerHTML = "⚠️ Esta vidraria não é adequada para este tipo de reação.";
+							statusText.innerHTML = "AVISO: Esta vidraria não é adequada para este tipo de reação.";
 						}
 						return;
 					}
@@ -1002,7 +1073,7 @@
 				if (!reactionFound) {
 					const hasAnyReag = benchItems.some(i => i.type === "reagent" || (i.type === "glassware" && i.contents.length > 0));
 					if (hasAnyReag) {
-						statusText.innerHTML = "⚠️ Faltam reagentes para esta reação.";
+						statusText.innerHTML = "AVISO: Faltam reagentes para esta reação.";
 					} else {
 						statusText.innerHTML = "Status: AGUARDANDO INTERAÇÃO...";
 					}
