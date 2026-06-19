@@ -1,1170 +1,1550 @@
 <!doctype html>
 
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Laboratório Químico Virtual - Simulador</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-          "FILL" 0,
-          "wght" 400,
-          "GRAD" 0,
-          "opsz" 24;
-      }
-      /* Custom scrollbar for inventory */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #006d3b;
-        border-radius: 10px;
-      }
-      /* Slider styling */
-      input[type="range"] {
-        -webkit-appearance: none;
-        width: 100%;
-        background: transparent;
-      }
-      input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 20px;
-        width: 20px;
-        border-radius: 50%;
-        background: #006d3b;
-        cursor: pointer;
-        margin-top: -8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-      }
-      input[type="range"]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 4px;
-        cursor: pointer;
-        background: #c4c6cc;
-        border-radius: 2px;
-      }
 
-      /* Boiling Animation Styles */
-      @keyframes flame-flicker {
-        0%,
-        100% {
-          transform: scaleY(1) scaleX(1);
-          opacity: 0.9;
-        }
-        50% {
-          transform: scaleY(1.2) scaleX(0.9);
-          opacity: 1;
-        }
-        75% {
-          transform: scaleY(0.9) scaleX(1.1);
-          opacity: 0.8;
-        }
-      }
-      @keyframes particle-rise {
-        0% {
-          transform: translateY(0) scale(0.5);
-          opacity: 0;
-        }
-        20% {
-          opacity: 0.8;
-        }
-        100% {
-          transform: translateY(-40px) scale(1.5);
-          opacity: 0;
-        }
-      }
-      @keyframes heat-distortion {
-        0%,
-        100% {
-          filter: blur(0px);
-          transform: translateY(0);
-        }
-        50% {
-          filter: blur(2px);
-          transform: translateY(-2px);
-        }
-      }
+<head>
+	<meta charset="utf-8" />
+	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+	<title>Laboratório Químico Virtual - Simulador</title>
+	<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+		rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet" />
+	<style>
+		.material-symbols-outlined {
+			font-variation-settings:
+				"FILL" 0,
+				"wght" 400,
+				"GRAD" 0,
+				"opsz" 24;
+		}
 
-      .active-flame {
-        animation: flame-flicker 0.4s infinite alternate ease-in-out;
-        color: #ff9800;
-        text-shadow:
-          0 0 10px #ff9800,
-          0 0 20px #ff5722;
-      }
-      .heat-haze {
-        animation: heat-distortion 2s infinite ease-in-out;
-      }
-      .particle {
-        position: absolute;
-        bottom: 20px;
-        background-color: #006d3b;
-        border-radius: 50%;
-        pointer-events: none;
-        opacity: 0;
-      }
+		/* Custom scrollbar for inventory */
+		.custom-scrollbar::-webkit-scrollbar {
+			width: 6px;
+		}
 
-      /* Draggable bench items */
-      .bench-item-draggable {
-        position: absolute;
-        cursor: grab;
-        user-select: none;
-      }
-      .bench-item-draggable:active {
-        cursor: grabbing;
-      }
-      #bench-area {
-        position: relative;
-      }
-    </style>
-    <script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "on-error": "#ffffff",
-              error: "#ba1a1a",
-              "on-error-container": "#93000a",
-              outline: "#74777d",
-              "surface-dim": "#dadada",
-              surface: "#f9f9f9",
-              primary: "#000000",
-              "on-primary-fixed-variant": "#3a4859",
-              "secondary-container": "#62fb9f",
-              "on-background": "#1a1c1c",
-              tertiary: "#000000",
-              secondary: "#006d3b",
-              "surface-bright": "#f9f9f9",
-              "secondary-fixed-dim": "#43e188",
-              "on-surface": "#1a1c1c",
-              "surface-container-highest": "#e2e2e2",
-              "on-primary-fixed": "#0f1c2c",
-              "primary-fixed": "#d6e4f9",
-              "primary-container": "#0f1c2c",
-              "on-secondary-fixed": "#00210e",
-              "inverse-primary": "#bac8dc",
-              "secondary-fixed": "#66fea2",
-              "surface-tint": "#525f71",
-              "on-secondary-container": "#00723e",
-              "on-secondary-fixed-variant": "#00522b",
-              "on-tertiary-fixed": "#1a1c1a",
-              background: "#f9f9f9",
-              "inverse-on-surface": "#f0f1f1",
-              "on-tertiary-fixed-variant": "#454745",
-              "on-surface-variant": "#44474c",
-              "error-container": "#ffdad6",
-              "on-primary": "#ffffff",
-              "on-secondary": "#ffffff",
-              "surface-container": "#eeeeee",
-              "on-tertiary": "#ffffff",
-              "tertiary-fixed": "#e2e3df",
-              "surface-variant": "#e2e2e2",
-              "on-tertiary-container": "#828481",
-              "tertiary-container": "#1a1c1a",
-              "tertiary-fixed-dim": "#c6c7c3",
-              "surface-container-high": "#e8e8e8",
-              "surface-container-lowest": "#ffffff",
-              "outline-variant": "#c4c6cc",
-              "surface-container-low": "#f3f3f4",
-              "primary-fixed-dim": "#bac8dc",
-              "on-primary-container": "#778598",
-              "inverse-surface": "#2f3131",
-            },
-            fontFamily: {
-              "display-lg": ["Inter"],
-              "headline-lg": ["Inter"],
-              "body-sm": ["Inter"],
-              "body-lg": ["Inter"],
-              "label-caps": ["Inter"],
-              "headline-lg-mobile": ["Inter"],
-              "title-md": ["Inter"],
-            },
-            fontSize: {
-              "display-lg": [
-                "48px",
-                {
-                  lineHeight: "56px",
-                  letterSpacing: "-0.02em",
-                  fontWeight: "700",
-                },
-              ],
-              "headline-lg": [
-                "32px",
-                { lineHeight: "40px", fontWeight: "600" },
-              ],
-              "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
-              "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
-              "label-caps": [
-                "12px",
-                {
-                  lineHeight: "16px",
-                  letterSpacing: "0.05em",
-                  fontWeight: "700",
-                },
-              ],
-              "headline-lg-mobile": [
-                "24px",
-                { lineHeight: "32px", fontWeight: "600" },
-              ],
-              "title-md": ["20px", { lineHeight: "28px", fontWeight: "500" }],
-            },
-          },
-        },
-      };
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const tabs = document.querySelectorAll(".tab-btn");
-        const contents = document.querySelectorAll(".tab-content");
+		.custom-scrollbar::-webkit-scrollbar-track {
+			background: transparent;
+		}
 
-        tabs.forEach((tab) => {
-          tab.addEventListener("click", () => {
-            const target = tab.dataset.target;
+		.custom-scrollbar::-webkit-scrollbar-thumb {
+			background-color: #006d3b;
+			border-radius: 10px;
+		}
 
-            tabs.forEach((t) => {
-              t.classList.remove(
-                "text-secondary",
-                "border-secondary",
-                "opacity-100",
-              );
-              t.classList.add(
-                "text-on-surface-variant",
-                "border-transparent",
-                "opacity-70",
-              );
-            });
-            tab.classList.add(
-              "text-secondary",
-              "border-secondary",
-              "opacity-100",
-            );
-            tab.classList.remove(
-              "text-on-surface-variant",
-              "border-transparent",
-              "opacity-70",
-            );
+		/* Slider styling */
+		input[type="range"] {
+			-webkit-appearance: none;
+			width: 100%;
+			background: transparent;
+		}
 
-            contents.forEach((c) => {
-              if (c.id === target) {
-                c.classList.remove("hidden");
-              } else {
-                c.classList.add("hidden");
-              }
-            });
-          });
-        });
+		input[type="range"]::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			height: 20px;
+			width: 20px;
+			border-radius: 50%;
+			background: #006d3b;
+			cursor: pointer;
+			margin-top: -8px;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+		}
 
-        // Basic Simulation Logic
-        const startBtn = document.getElementById("start-btn");
-        const statusText = document.getElementById("status-text");
-        const benchArea = document.getElementById("bench-area");
-        const clearBtn = document.getElementById("clear-btn");
-        const items = document.querySelectorAll(".draggable-item");
-        const tempSlider = document.getElementById("temp-slider");
-        const tempDisplay = document.getElementById("temp-display");
+		input[type="range"]::-webkit-slider-runnable-track {
+			width: 100%;
+			height: 4px;
+			cursor: pointer;
+			background: #c4c6cc;
+			border-radius: 2px;
+		}
 
-        let benchItems = [];
-        let particleInterval;
-        let reactionTimeout;
+		/* Boiling Animation Styles */
+		@keyframes flame-flicker {
 
-        items.forEach((item) => {
-          item.addEventListener("click", () => {
-            const name = item.dataset.name;
-            const type = item.dataset.type;
-            const icon = item.querySelector(
-              ".material-symbols-outlined",
-            ).innerText;
+			0%,
+			100% {
+				transform: scaleY(1) scaleX(1);
+				opacity: 0.9;
+			}
 
-            if (benchItems.length < 10) {
-              benchItems.push({ name, type, icon });
-              updateBenchUI();
-            } else {
-              alert("A bancada está cheia. Limpe para adicionar novos itens.");
-            }
-          });
-        });
+			50% {
+				transform: scaleY(1.2) scaleX(0.9);
+				opacity: 1;
+			}
 
-        clearBtn.addEventListener("click", () => {
-          benchItems = [];
-          updateBenchUI();
-          clearTimeout(reactionTimeout);
-          statusText.innerHTML = "Status: Aguardando interação...";
-          benchArea.classList.remove("bg-green-100", "bg-red-100");
-          stopBoilingEffect();
-          tempSlider.value = 25;
-          tempDisplay.innerText = "25°C";
-        });
+			75% {
+				transform: scaleY(0.9) scaleX(1.1);
+				opacity: 0.8;
+			}
+		}
 
-        function updateBenchUI() {
-          if (benchItems.length === 0) {
-            benchArea.innerHTML = `
-              <div class="w-64 h-[4 border-2 border-dashed border-outline-variant rounded-full flex flex-col items-center justify-center text-on-surface-variant bg-surface-container-low/60">
-                <span class="material-symbols-outlined text-[48px] mb-2 text-outline" data-icon="add_circle">add_circle</span>
-                <span class="font-body-sm text-body-sm text-center px-4 text-on-surface-variant">Clique nos materiais para adicionar à bancada</span>
-              </div>
-            `;
-          } else {
-            // Place items as absolutely-positioned draggable cards on the bench
-            benchArea.innerHTML = "";
-            const areaRect = benchArea.getBoundingClientRect();
-            const itemW = 160;
-            const itemH = 130;
-            const margin = 32;
+		@keyframes particle-rise {
+			0% {
+				transform: translateY(0) scale(0.5);
+				opacity: 0;
+			}
 
-            benchItems.forEach((item, index) => {
-              const startX = margin + index * (itemW + margin);
-              const startY = Math.round((benchArea.clientHeight - itemH) / 2);
+			20% {
+				opacity: 0.8;
+			}
 
-              const el = document.createElement("div");
-              el.className =
-                "bench-item-draggable bench-item flex flex-col items-center bg-surface/95 p-4 rounded-xl border border-outline-variant shadow-md relative";
-              el.style.left = startX + "px";
-              el.style.top = startY + "px";
-              el.style.width = itemW + "px";
-              el.dataset.index = index;
-              el.dataset.name = item.name;
-              el.innerHTML = `
-                <div class="relative flex items-center justify-center w-16 h-16 mb-2 item-icon-container">
-                  <span class="material-symbols-outlined text-[48px] text-primary item-icon">${item.icon}</span>
+			100% {
+				transform: translateY(-40px) scale(1.5);
+				opacity: 0;
+			}
+		}
+
+		@keyframes heat-distortion {
+
+			0%,
+			100% {
+				filter: blur(0px);
+				transform: translateY(0);
+			}
+
+			50% {
+				filter: blur(2px);
+				transform: translateY(-2px);
+			}
+		}
+
+		.active-flame {
+			animation: flame-flicker 0.4s infinite alternate ease-in-out;
+			color: #ff9800;
+			text-shadow:
+				0 0 10px #ff9800,
+				0 0 20px #ff5722;
+		}
+
+		.heat-haze {
+			animation: heat-distortion 2s infinite ease-in-out;
+		}
+
+		.particle {
+			position: absolute;
+			bottom: 20px;
+			background-color: #006d3b;
+			border-radius: 50%;
+			pointer-events: none;
+			opacity: 0;
+		}
+
+		/* Draggable bench items */
+		.bench-item-draggable {
+			position: absolute;
+			cursor: grab;
+			user-select: none;
+		}
+
+		.bench-item-draggable:active {
+			cursor: grabbing;
+		}
+
+		/* Glassware Visuals */
+		.glassware-container {
+			position: relative;
+			transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+		}
+
+		.glass-reflection {
+			pointer-events: none;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 100%);
+		}
+
+		.liquid-fill {
+			transition: height 0.3s ease-out, fill 0.5s ease;
+		}
+
+		/* Pouring Animation */
+		.pouring {
+			transform: rotate(60deg) translateY(-20px);
+			z-index: 50 !important;
+		}
+
+		@keyframes liquid-stream {
+			0% {
+				height: 0;
+				opacity: 0;
+				transform: translateY(0);
+			}
+
+			20% {
+				opacity: 1;
+				height: 40px;
+			}
+
+			80% {
+				opacity: 1;
+				height: 40px;
+			}
+
+			100% {
+				height: 40px;
+				opacity: 0;
+				transform: translateY(20px);
+			}
+		}
+
+		.stream-line {
+			position: absolute;
+			width: 3px;
+			background: inherit;
+			border-radius: 4px;
+			animation: liquid-stream 0.5s infinite linear;
+			left: 50%;
+			top: 0;
+			transform-origin: top;
+		}
+
+		#bench-area {
+			position: relative;
+		}
+	</style>
+	<script id="tailwind-config">
+		tailwind.config = {
+			darkMode: "class",
+			theme: {
+				extend: {
+					colors: {
+						"on-error": "#ffffff",
+						error: "#ba1a1a",
+						"on-error-container": "#93000a",
+						outline: "#74777d",
+						"surface-dim": "#dadada",
+						surface: "#f9f9f9",
+						primary: "#000000",
+						"on-primary-fixed-variant": "#3a4859",
+						"secondary-container": "#62fb9f",
+						"on-background": "#1a1c1c",
+						tertiary: "#000000",
+						secondary: "#006d3b",
+						"surface-bright": "#f9f9f9",
+						"secondary-fixed-dim": "#43e188",
+						"on-surface": "#1a1c1c",
+						"surface-container-highest": "#e2e2e2",
+						"on-primary-fixed": "#0f1c2c",
+						"primary-fixed": "#d6e4f9",
+						"primary-container": "#0f1c2c",
+						"on-secondary-fixed": "#00210e",
+						"inverse-primary": "#bac8dc",
+						"secondary-fixed": "#66fea2",
+						"surface-tint": "#525f71",
+						"on-secondary-container": "#00723e",
+						"on-secondary-fixed-variant": "#00522b",
+						"on-tertiary-fixed": "#1a1c1a",
+						background: "#f9f9f9",
+						"inverse-on-surface": "#f0f1f1",
+						"on-tertiary-fixed-variant": "#454745",
+						"on-surface-variant": "#44474c",
+						"error-container": "#ffdad6",
+						"on-primary": "#ffffff",
+						"on-secondary": "#ffffff",
+						"surface-container": "#eeeeee",
+						"on-tertiary": "#ffffff",
+						"tertiary-fixed": "#e2e3df",
+						"surface-variant": "#e2e2e2",
+						"on-tertiary-container": "#828481",
+						"tertiary-container": "#1a1c1a",
+						"tertiary-fixed-dim": "#c6c7c3",
+						"surface-container-high": "#e8e8e8",
+						"surface-container-lowest": "#ffffff",
+						"outline-variant": "#c4c6cc",
+						"surface-container-low": "#f3f3f4",
+						"primary-fixed-dim": "#bac8dc",
+						"on-primary-container": "#778598",
+						"inverse-surface": "#2f3131",
+					},
+					fontFamily: {
+						"display-lg": ["Inter"],
+						"headline-lg": ["Inter"],
+						"body-sm": ["Inter"],
+						"body-lg": ["Inter"],
+						"label-caps": ["Inter"],
+						"headline-lg-mobile": ["Inter"],
+						"title-md": ["Inter"],
+					},
+					fontSize: {
+						"display-lg": [
+							"48px",
+							{
+								lineHeight: "56px",
+								letterSpacing: "-0.02em",
+								fontWeight: "700",
+							},
+						],
+						"headline-lg": [
+							"32px",
+							{ lineHeight: "40px", fontWeight: "600" },
+						],
+						"body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+						"body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+						"label-caps": [
+							"12px",
+							{
+								lineHeight: "16px",
+								letterSpacing: "0.05em",
+								fontWeight: "700",
+							},
+						],
+						"headline-lg-mobile": [
+							"24px",
+							{ lineHeight: "32px", fontWeight: "600" },
+						],
+						"title-md": ["20px", { lineHeight: "28px", fontWeight: "500" }],
+					},
+				},
+			},
+		};
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const tabs = document.querySelectorAll(".tab-btn");
+			const contents = document.querySelectorAll(".tab-content");
+
+			tabs.forEach((tab) => {
+				tab.addEventListener("click", () => {
+					const target = tab.dataset.target;
+
+					tabs.forEach((t) => {
+						t.classList.remove(
+							"text-secondary",
+							"border-secondary",
+							"opacity-100",
+						);
+						t.classList.add(
+							"text-on-surface-variant",
+							"border-transparent",
+							"opacity-70",
+						);
+					});
+					tab.classList.add(
+						"text-secondary",
+						"border-secondary",
+						"opacity-100",
+					);
+					tab.classList.remove(
+						"text-on-surface-variant",
+						"border-transparent",
+						"opacity-70",
+					);
+
+					contents.forEach((c) => {
+						if (c.id === target) {
+							c.classList.remove("hidden");
+						} else {
+							c.classList.add("hidden");
+						}
+					});
+				});
+			});
+
+			// Basic Simulation Logic
+			const startBtn = document.getElementById("start-btn");
+			const statusText = document.getElementById("status-text");
+			const benchArea = document.getElementById("bench-area");
+			const clearBtn = document.getElementById("clear-btn");
+			const items = document.querySelectorAll(".draggable-item");
+			const tempSlider = document.getElementById("temp-slider");
+			const tempDisplay = document.getElementById("temp-display");
+
+			let benchItems = [];
+			let particleInterval;
+			let reactionTimeout;
+
+			window.removeBenchItem = (index) => {
+				benchItems.splice(index, 1);
+				updateBenchUI();
+			};
+
+			const reagentColors = {
+				"água": "#A5D8FF",
+				"hidróxido": "#E3F2FD",
+				"cloro": "#FFF59D",
+				"bromo": "#D32F2F",
+				"metano": "#E1F5FE",
+				"etileno": "#E1F5FE",
+				"ferro": "#757575",
+				"etanol": "#FFF3E0",
+				"gasolina": "#FBC02D",
+				"parafina": "#FFFFFF",
+				"default": "#E0E0E0"
+			};
+
+			function getReagentColor(name) {
+				const lowName = name.toLowerCase();
+				for (const key in reagentColors) {
+					if (lowName.includes(key)) return reagentColors[key];
+				}
+				return reagentColors.default;
+			}
+
+			function drawGlassware(type, fillPct, color, itemW) {
+				const height = 80;
+				const liquidHeight = (fillPct / 100) * (height - 10);
+				const colorFiltered = color === "transparent" ? "rgba(255,255,255,0.05)" : color;
+
+				let path = "";
+				let clipPath = "";
+
+				if (type.includes("Becker")) {
+					path = `M 15,5 L 15,75 Q 15,80 20,80 L 50,80 Q 55,80 55,75 L 55,5 L 50,5 L 50,7 M 15,5 L 10,2 L 15,7`;
+					clipPath = `M 15,5 L 15,80 L 55,80 L 55,5 Z`;
+				} else if (type.includes("Erlenmeyer")) {
+					path = `M 30,5 L 10,75 Q 8,80 15,80 L 55,80 Q 62,80 60,75 L 40,5 Z`;
+					clipPath = path;
+				} else if (type.includes("Proveta")) {
+					path = `M 30,5 L 30,75 Q 30,80 35,80 L 40,80 Q 45,80 45,75 L 45,5 Z`;
+					clipPath = path;
+				} else if (type.includes("Tubo")) {
+					path = `M 32,5 L 32,70 Q 32,80 36,80 Q 40,80 40,70 L 40,5 Z`;
+					clipPath = path;
+				} else if (type.includes("Balão")) {
+					path = `M 32,5 L 32,30 Q 15,35 15,55 Q 15,75 35,75 Q 55,75 55,55 Q 55,35 40,30 L 40,5 Z`;
+					clipPath = path;
+				} else if (type.includes("Pipeta")) {
+					path = `M 34,0 L 34,80 L 36,80 L 36,0 Z`;
+					clipPath = path;
+				} else {
+					path = `M 20,15 L 20,70 Q 20,75 25,75 L 45,75 Q 50,75 50,70 L 50,15 Q 50,10 45,10 L 40,10 L 40,5 L 30,5 L 30,10 L 25,10 Q 20,10 20,15 Z`;
+					clipPath = path;
+				}
+
+				const id = type.replace(/[^a-zA-Z]/g, '') + Math.floor(Math.random() * 1000);
+
+				return `
+					<svg width="${itemW}" height="100" viewBox="0 0 70 90" class="glassware-svg overflow-visible drop-shadow-sm">
+						<defs>
+							<clipPath id="clip-${id}">
+								<path d="${clipPath}" />
+							</clipPath>
+							<linearGradient id="grad-${id}" x1="0%" y1="0%" x2="100%" y2="0%">
+								<stop offset="0%" style="stop-color:rgba(255,255,255,0.4)" />
+								<stop offset="30%" style="stop-color:rgba(255,255,255,0.1)" />
+								<stop offset="100%" style="stop-color:rgba(255,255,255,0.3)" />
+							</linearGradient>
+						</defs>
+						<ellipse cx="35" cy="82" rx="22" ry="4" fill="rgba(0,0,0,0.08)" />
+						<rect x="0" y="${80 - liquidHeight}" width="70" height="${liquidHeight + 10}" 
+							  fill="${colorFiltered}" clip-path="url(#clip-${id})" 
+							  class="liquid-fill" />
+						<path d="${path}" fill="url(#grad-${id})" stroke="rgba(200,220,255,0.5)" stroke-width="1.5" />
+						<path d="M 22,20 L 22,40" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" />
+					</svg>
+				`;
+			}
+
+			function getBenchItemVisual(item) {
+				let fillPct = (item.volume / item.maxVolume) * 100;
+				if (item.type === "reagent") fillPct = 75; // Reagente sempre visualmente cheio (75%)
+				return drawGlassware(item.name || "Reagente", fillPct, item.liquidColor, 80);
+			}
+
+			items.forEach((item) => {
+				item.addEventListener("click", () => {
+					const name = item.dataset.name;
+					const type = item.dataset.type;
+
+					const iconEl = item.querySelector(".material-symbols-outlined");
+					const formulaEl = item.querySelector("span.font-bold");
+					const icon = iconEl ? iconEl.innerText : (formulaEl ? formulaEl.innerText : "");
+
+					if (benchItems.length < 15) {
+						let maxVol = 250;
+						if (name.includes("Proveta")) maxVol = 100;
+						if (name.includes("Erlenmeyer")) maxVol = 125;
+						if (name.includes("Tubo")) maxVol = 20;
+						if (name.includes("Pipeta")) maxVol = 10;
+						if (name.includes("Petri")) maxVol = 30;
+
+						const newItem = {
+							name,
+							type,
+							icon,
+							volume: type === "reagent" ? 50 : 0,
+							maxVolume: maxVol,
+							liquidColor: type === "reagent" ? getReagentColor(name) : "transparent",
+							contents: type === "reagent" ? [name] : [],
+							x: 50 + (benchItems.length * 120) % (window.innerWidth * 0.4), // Initial spacing
+							y: 150 + Math.floor(benchItems.length / 5) * 50
+						};
+
+						benchItems.push(newItem);
+						updateBenchUI();
+					} else {
+						alert("A bancada está cheia. Limpe para adicionar novos itens.");
+					}
+				});
+			});
+
+			clearBtn.addEventListener("click", () => {
+				benchItems = [];
+				updateBenchUI();
+				clearTimeout(reactionTimeout);
+				statusText.innerHTML = "Status: Aguardando interação...";
+				benchArea.classList.remove("bg-green-100", "bg-red-100");
+				stopBoilingEffect();
+				tempSlider.value = 25;
+				tempDisplay.innerText = "25°C";
+			});
+
+			function updateBenchUI() {
+				const placeholder = document.getElementById("bench-placeholder");
+				if (benchItems.length === 0) {
+					if (placeholder) placeholder.classList.remove("hidden");
+					benchArea.querySelectorAll(".bench-item").forEach(el => el.remove());
+				} else {
+					if (placeholder) placeholder.classList.add("hidden");
+					const itemsContainer = document.getElementById("bench-items-container");
+					if (itemsContainer) itemsContainer.innerHTML = "";
+
+					const areaRect = benchArea.getBoundingClientRect();
+					const itemW = 160;
+					const itemH = 130;
+					const margin = 32;
+
+					benchItems.forEach((item, index) => {
+						const el = document.createElement("div");
+						el.className =
+							"bench-item-draggable bench-item flex flex-col items-center p-4 rounded-xl z-10 transition-all hover:bg-surface/20 glassware-container";
+						el.style.left = (item.x || 0) + "px";
+						el.style.top = (item.y || 0) + "px";
+						el.style.width = itemW + "px";
+						el.id = `item-${index}`;
+						el.dataset.index = index;
+						el.dataset.name = item.name;
+						el.dataset.type = item.type;
+
+						const visualHtml = getBenchItemVisual(item);
+
+						el.innerHTML = `
+                <div class="relative flex items-center justify-center w-20 h-24 mb-2 item-icon-container">
+                  ${visualHtml}
+                  <div class="stream-container hidden absolute top-0 left-1/2 w-full h-10 overflow-visible pointer-events-none">
+                  	<div class="stream-line" style="background:${item.liquidColor}"></div>
+                  </div>
                 </div>
-                <span class="text-on-surface font-body-sm text-body-sm text-center max-w-[140px]">${item.name}</span>
+                <span class="text-on-surface font-body-sm text-body-sm text-center max-w-[140px] font-bold drop-shadow-sm">${item.name}</span>
+                <div class="text-[10px] text-secondary font-bold">${item.type === 'glassware' ? `${item.volume.toFixed(0)}${item.unit || 'ml'} / ${item.maxVolume}${item.unit || 'ml'}` : ''}</div>
+                <button class="absolute top-0 right-0 bg-outline/20 hover:bg-error hover:text-white text-on-surface-variant rounded-full w-6 h-6 flex items-center justify-center text-[18px] transition-all" onclick="event.stopPropagation(); removeBenchItem(${index})">×</button>
               `;
-              benchArea.appendChild(el);
+						const itemsContainer = document.getElementById("bench-items-container");
+						if (itemsContainer) itemsContainer.appendChild(el);
 
-              // Drag-to-reposition logic
-              makeDraggableBenchItem(el, benchArea);
-            });
+						makeDraggableBenchItem(el, benchArea);
 
-            // Attach boiling effect to Bunsen burner
-            const bunsenItem = benchArea.querySelector(
-              '.bench-item[data-name="Bico de Bunsen"]',
-            );
-            if (bunsenItem) {
-              bunsenItem.addEventListener("click", toggleBoilingEffect);
-            }
-          }
-        }
+						// Restore interactive flame for Bunsen
+						if (item.name.includes("Bunsen")) {
+							el.addEventListener("click", toggleBoilingEffect);
+						}
+					});
 
-        function makeDraggableBenchItem(el, container) {
-          let startX, startY, origLeft, origTop;
+					// Global Status Logic
+					if (benchItems.length === 0) {
+						statusText.innerHTML = "Status: AGUARDANDO INTERAÇÃO...";
+					} else {
+						const currentStatus = statusText.innerText;
+						if (currentStatus.includes("AGUARDANDO") || currentStatus.includes("CONCLUÍDA") || currentStatus.includes("⚠️")) {
+							statusText.innerHTML = "Status: PRONTO PARA MISTURAR";
+						}
+					}
+				}
+			}
 
-          el.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            startX = e.clientX;
-            startY = e.clientY;
-            origLeft = parseInt(el.style.left) || 0;
-            origTop = parseInt(el.style.top) || 0;
-            el.style.zIndex = 100;
-            el.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+			function hexToRgb(hex) {
+				const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+				return result ? {
+					r: parseInt(result[1], 16),
+					g: parseInt(result[2], 16),
+					b: parseInt(result[3], 16)
+				} : { r: 255, g: 255, b: 255 };
+			}
 
-            function onMouseMove(e) {
-              const dx = e.clientX - startX;
-              const dy = e.clientY - startY;
-              const newLeft = Math.max(
-                0,
-                Math.min(
-                  container.clientWidth - el.offsetWidth,
-                  origLeft + dx,
-                ),
-              );
-              const newTop = Math.max(
-                0,
-                Math.min(
-                  container.clientHeight - el.offsetHeight,
-                  origTop + dy,
-                ),
-              );
-              el.style.left = newLeft + "px";
-              el.style.top = newTop + "px";
-            }
+			function rgbToHex(r, g, b) {
+				return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+			}
 
-            function onMouseUp() {
-              el.style.zIndex = "";
-              el.style.boxShadow = "";
-              document.removeEventListener("mousemove", onMouseMove);
-              document.removeEventListener("mouseup", onMouseUp);
-            }
+			function mixColors(color1, vol1, color2, vol2) {
+				if (color1 === "transparent") return color2;
+				if (color2 === "transparent") return color1;
 
-            document.addEventListener("mousemove", onMouseMove);
-            document.addEventListener("mouseup", onMouseUp);
-          });
-        }
+				const rgb1 = hexToRgb(color1);
+				const rgb2 = hexToRgb(color2);
+				const total = vol1 + vol2;
 
-        // Boiling effect logic
-        let isHeating = false;
+				const r = Math.round((rgb1.r * vol1 + rgb2.r * vol2) / total);
+				const g = Math.round((rgb1.g * vol1 + rgb2.g * vol2) / total);
+				const b = Math.round((rgb1.b * vol1 + rgb2.b * vol2) / total);
 
-        function toggleBoilingEffect() {
-          if (isHeating) {
-            stopBoilingEffect();
-            tempSlider.value = 25;
-            tempDisplay.innerText = "25°C";
-          } else {
-            startBoilingEffect();
-            tempSlider.value = 80;
-            tempDisplay.innerText = "80°C";
-          }
-        }
+				return rgbToHex(r, g, b);
+			}
 
-        tempSlider.addEventListener("input", (e) => {
-          const temp = parseInt(e.target.value);
-          tempDisplay.innerText = `${temp}°C`;
+			function pourLiquid(sourceIdx, targetIdx) {
+				const source = benchItems[sourceIdx];
+				const target = benchItems[targetIdx];
 
-          const hasBunsen = benchItems.some((i) => i.name === "Bico de Bunsen");
-          if (hasBunsen) {
-            if (temp > 40) {
-              startBoilingEffect(temp);
-            } else {
-              stopBoilingEffect();
-            }
-          }
-        });
+				if (source.volume <= 0 && source.type !== "reagent") return;
+				if (target.volume >= target.maxVolume) {
+					statusText.innerHTML = "⚠️ Capacidade máxima atingida";
+					return;
+				}
 
-        function startBoilingEffect(temp = 80) {
-          const bunsenItem = benchArea.querySelector(
-            '.bench-item[data-name="Bico de Bunsen"]',
-          );
-          const otherItems = benchArea.querySelectorAll(
-            '.bench-item:not([data-name="Bico de Bunsen"])',
-          );
+				openVolumeModal(sourceIdx, targetIdx);
+			}
 
-          if (!bunsenItem) return;
+			function openVolumeModal(sourceIdx, targetIdx) {
+				const source = benchItems[sourceIdx];
+				const target = benchItems[targetIdx];
+				const modal = document.getElementById("volume-modal");
+				const title = document.getElementById("modal-title");
+				const input = document.getElementById("modal-input");
+				const unitSpan = document.getElementById("modal-unit");
+				const warning = document.getElementById("modal-warning");
 
-          isHeating = true;
-          const icon = bunsenItem.querySelector(".item-icon");
-          icon.classList.add("active-flame");
+				const isSolid = source.name.includes("Ferro") || source.name.includes("Parafina");
+				const unit = isSolid ? "g" : "ml";
 
-          if (otherItems.length > 0) {
-            otherItems[0]
-              .querySelector(".item-icon-container")
-              .classList.add("heat-haze");
-            createParticles(
-              otherItems[0].querySelector(".item-icon-container"),
-              temp,
-            );
-          } else {
-            createParticles(
-              bunsenItem.querySelector(".item-icon-container"),
-              temp,
-            );
-          }
-        }
+				pendingSourceIdx = sourceIdx;
+				pendingTargetIdx = targetIdx;
 
-        function stopBoilingEffect() {
-          isHeating = false;
-          clearInterval(particleInterval);
-          const bunsenItem = benchArea.querySelector(
-            '.bench-item[data-name="Bico de Bunsen"]',
-          );
-          if (bunsenItem) {
-            bunsenItem
-              .querySelector(".item-icon")
-              .classList.remove("active-flame");
-          }
+				title.innerText = `Quanto de ${source.name} deseja adicionar?`;
+				unitSpan.innerText = unit;
+				input.value = 50;
+				input.max = target.maxVolume - target.volume;
+				warning.classList.add("hidden");
+				modal.classList.remove("hidden");
+			}
 
-          benchArea
-            .querySelectorAll(".heat-haze")
-            .forEach((el) => el.classList.remove("heat-haze"));
-          benchArea.querySelectorAll(".particle").forEach((el) => el.remove());
-        }
+			function executePour(sourceIdx, targetIdx, amount) {
+				const source = benchItems[sourceIdx];
+				const target = benchItems[targetIdx];
+				const sourceEl = document.getElementById(`item-${sourceIdx}`);
+				const targetEl = document.getElementById(`item-${targetIdx}`);
 
-        function createParticles(container, temp) {
-          clearInterval(particleInterval);
+				sourceEl.classList.add("pouring");
+				const stream = sourceEl.querySelector(".stream-container");
+				stream.classList.remove("hidden");
 
-          const intensity = Math.max(10, 200 - temp * 1.5);
+				const steps = 20;
+				const amountPerStep = amount / steps;
+				let currentStep = 0;
 
-          particleInterval = setInterval(() => {
-            const particle = document.createElement("div");
-            particle.classList.add("particle");
+				const interval = setInterval(() => {
+					currentStep++;
+					target.liquidColor = mixColors(target.liquidColor, target.volume, source.liquidColor, amountPerStep);
 
-            const size = Math.random() * 6 + 2;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
+					if (source.type !== "reagent") {
+						source.volume -= amountPerStep;
+						if (source.volume < 0.1) source.volume = 0;
+					}
 
-            const left = Math.random() * 40 + 10;
-            particle.style.left = `${left}px`;
+					target.volume += amountPerStep;
+					target.unit = source.name.includes("Ferro") || source.name.includes("Parafina") ? "g" : "ml";
 
-            const duration = Math.random() * 1 + 0.5;
-            particle.style.animation = `particle-rise ${duration}s ease-in forwards`;
+					source.contents.forEach(c => {
+						if (!target.contents.includes(c)) target.contents.push(c);
+					});
 
-            container.appendChild(particle);
+					updateBenchUI();
 
-            setTimeout(() => {
-              if (particle.parentNode) {
-                particle.remove();
-              }
-            }, duration * 1000);
-          }, intensity);
-        }
+					if (currentStep >= steps || target.volume >= target.maxVolume) {
+						clearInterval(interval);
+						sourceEl.classList.remove("pouring");
+						stream.classList.add("hidden");
+						checkReaction(targetIdx);
+					}
+				}, 100);
+			}
 
-        startBtn.addEventListener("click", () => {
-          if (benchItems.length !== 2) {
-            statusText.innerHTML =
-              "Status: Adicione dois reagentes para iniciar a mistura.";
-            return;
-          }
+			// Modal Event Listeners
+			document.getElementById("modal-confirm").addEventListener("click", () => {
+				const input = document.getElementById("modal-input");
+				const warning = document.getElementById("modal-warning");
+				const target = benchItems[pendingTargetIdx];
+				const val = parseFloat(input.value);
+				const max = target.maxVolume - target.volume;
 
-          clearTimeout(reactionTimeout);
-          const reagents = benchItems.map((i) => i.name);
+				if (isNaN(val) || val <= 0) return;
+				if (val > max) {
+					warning.innerText = `⚠️ Só é possível adicionar até ${max.toFixed(0)}${target.unit || 'ml'} — capacidade máxima da vidraria.`;
+					warning.classList.remove("hidden");
+					return;
+				}
 
-          if (
-            reagents.includes("Metano (CH4)") &&
-            reagents.includes("Cloro (Cl2)")
-          ) {
-            statusText.innerHTML = "Status: Reação em andamento...";
-            benchArea.classList.add("bg-green-100");
-            reactionTimeout = setTimeout(() => {
-              statusText.innerHTML =
-                '<span class="text-secondary font-bold">Reacção de Substituição — CH4 + Cl2 → CH3Cl + HCl</span>';
-            }, 3000);
-          } else if (
-            reagents.includes("2-bromobutano") &&
-            reagents.includes("Hidróxido de sódio (NaOH)")
-          ) {
-            statusText.innerHTML = "Status: Reação em andamento...";
-            benchArea.classList.add("bg-green-100");
-            reactionTimeout = setTimeout(() => {
-              statusText.innerHTML =
-                '<span class="text-secondary font-bold">Reacção de Eliminação — 2-bromobutano + NaOH → Buteno + NaBr + H2O</span>';
-            }, 3000);
-          } else if (
-            reagents.includes("Etileno (C2H4)") &&
-            reagents.includes("Bromo (Br2)")
-          ) {
-            statusText.innerHTML = "Status: Reação em andamento...";
-            benchArea.classList.add("bg-green-100");
-            reactionTimeout = setTimeout(() => {
-              statusText.innerHTML =
-                '<span class="text-secondary font-bold">Reacção de Adição — C2H4 + Br2 → C2H4Br2</span>';
-            }, 3000);
-          } else if (benchItems.every((i) => i.type === "reagent")) {
-            statusText.innerHTML = "Status: Misturando reagentes...";
-            benchArea.classList.add("bg-red-100");
-            reactionTimeout = setTimeout(() => {
-              statusText.innerHTML =
-                '<span class="text-error font-bold">Estes reagentes não reagem entre si. Tenta outra combinação.</span>';
-            }, 3000);
-          } else {
-            statusText.innerHTML =
-              '<span class="text-yellow-700 font-bold">Mistura inválida. Selecione dois reagentes para observar a reação.</span>';
-          }
-        });
-      });
-    </script>
-  </head>
-  <body
-    class="bg-background text-on-surface font-body-lg h-screen flex flex-col overflow-hidden"
-  >
-    <!-- TopNavBar -->
-    <header
-      class="bg-surface text-primary font-title-md border-b border-outline-variant shadow-sm fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16"
-    >
-      <div class="flex items-center gap-4">
-        <span
-          class="material-symbols-outlined cursor-pointer hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 text-primary"
-          >menu</span
-        >
-        <span class="text-xl font-bold text-primary"
-          >Laboratório Químico Virtual</span
-        >
-      </div>
-      <div class="flex items-center gap-4">
-        <span
-          class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95"
-          >account_circle</span
-        >
-        <span
-          class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95"
-          >help</span
-        >
-      </div>
-    </header>
+				document.getElementById("volume-modal").classList.add("hidden");
+				executePour(pendingSourceIdx, pendingTargetIdx, val);
+			});
 
-    <!-- Main Workspace -->
-    <main class="flex-1 flex mt-16 overflow-hidden h-[calc(100vh-64px)]">
-      <!-- Left Panel: Inventário (30%) -->
-      <aside
-        class="w-[30%] bg-surface-container-low border-r border-outline-variant flex flex-col shadow-sm z-10 relative"
-      >
-        <!-- Header -->
-        <div class="p-6 border-b border-outline-variant bg-surface">
-          <h2 class="text-lg font-bold mb-1 text-primary">Inventário</h2>
-          <p class="text-xs mb-5 uppercase tracking-wider text-on-surface-variant">
-            Materiais de Bancada
-          </p>
-          <button
-              class="flex items-center gap-xs text-on-surface-variant font-body-sm text-body-sm hover:text-primary transition-colors border border-outline-variant/50 rounded-full px-7 py-2 ml-[60%] mb-md bg-surface/50 backdrop-blur-sm"
-              onclick="window.location.href='dashboard.html'"
-            >
-              <span class="material-symbols-outlined text-[18px]"
-                >arrow_back</span
-              >
-              Voltar
-            </button>
-        </div>
-        <!-- Tabs -->
-        <nav
-          class="flex border-b border-outline-variant text-xs uppercase tracking-wider bg-surface"
-        >
-          <button
-            class="tab-btn flex-1 py-3 px-2 text-center text-secondary border-b-2 border-secondary font-bold hover:bg-surface-container-low transition-colors flex flex-col items-center gap-1 opacity-100"
-            data-target="tab-vidrarias"
-          >
-            <span class="material-symbols-outlined text-[20px]">science</span>
-            Vidrarias
-          </button>
-          <button
-            class="tab-btn flex-1 py-3 px-2 text-center text-on-surface-variant border-b-2 border-transparent hover:bg-surface-container-low transition-all flex flex-col items-center gap-1 opacity-70"
-            data-target="tab-reagentes"
-          >
-            <span class="material-symbols-outlined text-[20px]">opacity</span>
-            Reagentes
-          </button>
-          <button
-            class="tab-btn flex-1 py-3 px-2 text-center text-on-surface-variant border-b-2 border-transparent hover:bg-surface-container-low transition-all flex flex-col items-center gap-1 opacity-70"
-            data-target="tab-equipamentos"
-          >
-            <span class="material-symbols-outlined text-[20px]"
-              >precision_manufacturing</span
-            >
-            Equipamentos
-          </button>
-        </nav>
+			document.getElementById("modal-cancel").addEventListener("click", () => {
+				document.getElementById("volume-modal").classList.add("hidden");
+			});
 
-        <!-- Tab Contents -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-4 bg-surface-container-low/40" id="tab-wrapper">
+			function checkReaction(idx) {
+				const item = benchItems[idx];
+				if (item.contents.length < 2) return;
 
-          <!-- ── Vidrarias Tab ── -->
-          <div class="space-y-2 tab-content" id="tab-vidrarias">
-            <!-- Becker -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Becker (250 ml)"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >science</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">Becker (250 ml)</h3>
-              </div>
-            </div>
-            <!-- Proveta -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Proveta (100 ml)"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >science</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">Proveta (100 ml)</h3>
-              </div>
-            </div>
-            <!-- Erlenmeyer -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Erlenmeyer (125 ml)"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >experiment</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Erlenmeyer (125 ml)
-                </h3>
-              </div>
-            </div>
-            <!-- Tubo de ensaio -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Tubo de ensaio"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >science</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">Tubo de ensaio</h3>
-              </div>
-            </div>
-            <!-- Funil de separação -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Funil de separação"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >filter_alt</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Funil de separação
-                </h3>
-              </div>
-            </div>
-            <!-- Balão fundo redondo -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Balão de fundo redondo (250 ml)"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >science</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Balão de fundo redondo (250 ml)
-                </h3>
-              </div>
-            </div>
-            <!-- Pipeta graduada -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Pipeta graduada (10 ml)"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >science</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Pipeta graduada (10 ml)
-                </h3>
-              </div>
-            </div>
-            <!-- Condensador -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Condensador (Liebig)"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >science</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Condensador (Liebig)
-                </h3>
-              </div>
-            </div>
-            <!-- Placa de Petri -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Placa de Petri"
-              data-type="glassware"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >radio_button_unchecked</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">Placa de Petri</h3>
-              </div>
-            </div>
-          </div>
+				const reagents = item.contents;
+				const solvent = document.getElementById("solvent-select").value;
 
-          <!-- ── Reagentes Tab ── -->
-          <div class="space-y-2 hidden tab-content" id="tab-reagentes">
+				if (reagents.some(r => r.includes("Metano")) && reagents.some(r => r.includes("Cloro"))) {
+					item.liquidColor = "#FFEB3B";
+					statusText.innerHTML = 'Status: REAÇÃO CONCLUÍDA — Substituição: CH₄ + Cl₂ → CH₃Cl + HCl';
+				} else if (reagents.some(r => r.includes("2-bromobutano")) && reagents.some(r => r.includes("NaOH"))) {
+					item.liquidColor = "#4CAF50";
+					statusText.innerHTML = `Status: REAÇÃO CONCLUÍDA — ${solvent.includes("Etanol") ? "Eliminação" : "Substituição"} em curso!`;
+				} else if (reagents.some(r => r.includes("Etileno")) && reagents.some(r => r.includes("Bromo"))) {
+					item.liquidColor = "#FF9800";
+					statusText.innerHTML = 'Status: REAÇÃO CONCLUÍDA — Adição: C₂H₄ + Br₂ → C₂H₄Br₂';
+				}
+				updateBenchUI();
+			}
 
-            <!-- Secção: Substituição -->
-            <h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-1 pt-1">
-              Substituição
-            </h4>
+			function makeDraggableBenchItem(el, container) {
+				let startX, startY, origLeft, origTop;
 
-            <!-- Metano -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-3"
-              data-name="Metano (CH4)"
-              data-type="reagent"
-            >
-              <div
-                class="w-12 h-12 rounded-lg bg-secondary-container/40 border border-secondary/30 flex items-center justify-center shrink-0"
-              >
-                <span class="font-bold text-[11px] text-secondary leading-tight text-center px-1">CH₄</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-on-surface text-sm">Metano</h3>
-                <p class="text-on-surface-variant text-[11px]">Gás · Inflamável</p>
-                <span class="inline-block mt-0.5 bg-secondary-container text-on-secondary-container text-[10px] px-2 py-0.5 rounded-full font-bold">Seguro</span>
-              </div>
-            </div>
+				el.addEventListener("mousedown", (e) => {
+					if (e.target.tagName === "BUTTON") return;
+					e.preventDefault();
+					startX = e.clientX;
+					startY = e.clientY;
+					origLeft = parseInt(el.style.left) || 0;
+					origTop = parseInt(el.style.top) || 0;
+					el.style.zIndex = 100;
+					el.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
 
-            <!-- Cloro -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-error transition-all cursor-pointer flex items-center gap-3"
-              data-name="Cloro (Cl2)"
-              data-type="reagent"
-            >
-              <div
-                class="w-12 h-12 rounded-lg bg-error-container border border-error/30 flex items-center justify-center shrink-0"
-              >
-                <span class="font-bold text-[11px] text-error leading-tight text-center px-1">Cl₂</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-on-surface text-sm">Cloro</h3>
-                <p class="text-on-surface-variant text-[11px]">Gás · Volátil</p>
-                <span class="inline-block mt-0.5 bg-error-container text-on-error-container text-[10px] px-2 py-0.5 rounded-full font-bold">Corrosivo</span>
-              </div>
-            </div>
+					function onMouseMove(e) {
+						const dx = e.clientX - startX;
+						const dy = e.clientY - startY;
 
-            <!-- Secção: Eliminação -->
-            <h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-1 pt-2">
-              Eliminação
-            </h4>
+						const newLeft = Math.max(0, origLeft + dx);
+						const newTop = Math.max(0, origTop + dy);
 
-            <!-- 2-Bromobutano -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-3"
-              data-name="2-bromobutano"
-              data-type="reagent"
-            >
-              <div
-                class="w-12 h-12 rounded-lg bg-secondary-container/40 border border-secondary/30 flex items-center justify-center shrink-0"
-              >
-                <span class="font-bold text-[9px] text-secondary leading-tight text-center px-0.5">C₄H₉Br</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-on-surface text-sm">2-bromobutano</h3>
-                <p class="text-on-surface-variant text-[11px]">Líquido</p>
-                <span class="inline-block mt-0.5 bg-secondary-container text-on-secondary-container text-[10px] px-2 py-0.5 rounded-full font-bold">Seguro</span>
-              </div>
-            </div>
+						el.style.left = newLeft + "px";
+						el.style.top = newTop + "px";
+					}
 
-            <!-- Hidróxido de Sódio -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-error transition-all cursor-pointer flex items-center gap-3"
-              data-name="Hidróxido de sódio (NaOH)"
-              data-type="reagent"
-            >
-              <div
-                class="w-12 h-12 rounded-lg bg-error-container border border-error/30 flex items-center justify-center shrink-0"
-              >
-                <span class="font-bold text-[11px] text-error leading-tight text-center px-1">NaOH</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-on-surface text-sm">Hidróxido de Sódio</h3>
-                <p class="text-on-surface-variant text-[11px]">Solução 0.1M</p>
-                <span class="inline-block mt-0.5 bg-error-container text-on-error-container text-[10px] px-2 py-0.5 rounded-full font-bold">Corrosivo</span>
-              </div>
-            </div>
+					function onMouseUp() {
+						el.style.zIndex = "";
+						el.style.boxShadow = "";
+						document.removeEventListener("mousemove", onMouseMove);
+						document.removeEventListener("mouseup", onMouseUp);
 
-            <!-- Secção: Adição -->
-            <h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-1 pt-2">
-              Adição
-            </h4>
+						// Save final position to state
+						const idx = parseInt(el.dataset.index);
+						if (benchItems[idx]) {
+							benchItems[idx].x = parseInt(el.style.left);
+							benchItems[idx].y = parseInt(el.style.top);
+						}
 
-            <!-- Etileno -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-3"
-              data-name="Etileno (C2H4)"
-              data-type="reagent"
-            >
-              <div
-                class="w-12 h-12 rounded-lg bg-secondary-container/40 border border-secondary/30 flex items-center justify-center shrink-0"
-              >
-                <span class="font-bold text-[11px] text-secondary leading-tight text-center px-1">C₂H₄</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-on-surface text-sm">Etileno</h3>
-                <p class="text-on-surface-variant text-[11px]">Gás · Inflamável</p>
-                <span class="inline-block mt-0.5 bg-secondary-container text-on-secondary-container text-[10px] px-2 py-0.5 rounded-full font-bold">Seguro</span>
-              </div>
-            </div>
+						const rectA = el.getBoundingClientRect();
+						const others = container.querySelectorAll(".bench-item");
+						others.forEach(other => {
+							if (other === el) return;
+							const rectB = other.getBoundingClientRect();
 
-            <!-- Bromo -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-error transition-all cursor-pointer flex items-center gap-3"
-              data-name="Bromo (Br2)"
-              data-type="reagent"
-            >
-              <div
-                class="w-12 h-12 rounded-lg bg-error-container border border-error/30 flex items-center justify-center shrink-0"
-              >
-                <span class="font-bold text-[11px] text-error leading-tight text-center px-1">Br₂</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-on-surface text-sm">Bromo</h3>
-                <p class="text-on-surface-variant text-[11px]">Líquido · Volátil</p>
-                <span class="inline-block mt-0.5 bg-error-container text-on-error-container text-[10px] px-2 py-0.5 rounded-full font-bold">Corrosivo</span>
-              </div>
-            </div>
-          </div>
+							const overlap = !(rectA.right < rectB.left ||
+								rectA.left > rectB.right ||
+								rectA.bottom < rectB.top ||
+								rectA.top > rectB.bottom);
 
-          <!-- ── Equipamentos Tab ── -->
-          <div class="space-y-2 hidden tab-content" id="tab-equipamentos">
-            <!-- Suporte universal -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Suporte universal com garra"
-              data-type="equipment"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >build</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Suporte universal com garra
-                </h3>
-              </div>
-            </div>
-            <!-- Bico de Bunsen -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Bico de Bunsen"
-              data-type="equipment"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >local_fire_department</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">Bico de Bunsen</h3>
-              </div>
-            </div>
-            <!-- Agitador magnético -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Agitador magnético com aquecimento"
-              data-type="equipment"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >settings_input_component</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">
-                  Agitador magnético com aquecimento
-                </h3>
-              </div>
-            </div>
-            <!-- Balança analítica -->
-            <div
-              class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
-              data-name="Balança analítica"
-              data-type="equipment"
-            >
-              <div
-                class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0"
-              >
-                <span
-                  class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary"
-                  >scale</span
-                >
-              </div>
-              <div>
-                <h3 class="font-semibold text-on-surface">Balança analítica</h3>
-              </div>
-            </div>
-          </div>
+							if (overlap) {
+								pourLiquid(parseInt(el.dataset.index), parseInt(other.dataset.index));
+							}
+						});
+					}
 
-        </div>
-      </aside>
+					document.addEventListener("mousemove", onMouseMove);
+					document.addEventListener("mouseup", onMouseUp);
+				});
+			}
 
-      <!-- Right Panel: Bancada de Laboratório (70%) -->
-      <section
-        class="w-[70%] relative flex flex-col bg-background overflow-hidden"
-      >
-        <!-- Subtle dot pattern -->
-        <div
-          class="absolute inset-0 pointer-events-none opacity-[0.04]"
-          style="
+			// Boiling effect logic
+			let isHeating = false;
+
+			function toggleBoilingEffect() {
+				if (isHeating) {
+					stopBoilingEffect();
+					tempSlider.value = 25;
+					tempDisplay.innerText = "25°C";
+				} else {
+					startBoilingEffect();
+					tempSlider.value = 80;
+					tempDisplay.innerText = "80°C";
+				}
+			}
+
+			tempSlider.addEventListener("input", (e) => {
+				const temp = parseInt(e.target.value);
+				tempDisplay.innerText = `${temp}°C`;
+
+				const hasBunsen = benchItems.some((i) => i.name === "Bico de Bunsen");
+				if (hasBunsen) {
+					if (temp > 40) {
+						startBoilingEffect(temp);
+					} else {
+						stopBoilingEffect();
+					}
+				}
+			});
+
+			// Concentration Slider logic
+			const concSlider = document.getElementById("concentration-slider");
+			const concDisplay = document.getElementById("concentration-display");
+			if (concSlider && concDisplay) {
+				concSlider.addEventListener("input", (e) => {
+					concDisplay.innerText = parseFloat(e.target.value).toFixed(1);
+				});
+			}
+
+			function startBoilingEffect(temp = 80) {
+				const bunsenItem = benchArea.querySelector(
+					'.bench-item[data-name="Bico de Bunsen"]',
+				);
+				const otherItems = benchArea.querySelectorAll(
+					'.bench-item:not([data-name="Bico de Bunsen"])',
+				);
+
+				if (!bunsenItem) return;
+
+				isHeating = true;
+				const icon = bunsenItem.querySelector(".item-icon");
+				icon.classList.add("active-flame");
+
+				// Check for auto-combustion if heating fuel
+				const hasFuel = benchItems.some(i => i.name.includes("Etanol") || i.name.includes("Gasolina") || i.name.includes("Parafina"));
+				if (hasFuel && temp > 60) {
+					startFuelFlame();
+					statusText.innerHTML = "Status: Ignição detectada! Combustão em curso.";
+				}
+
+				if (otherItems.length > 0) {
+					otherItems[0]
+						.querySelector(".item-icon-container")
+						.classList.add("heat-haze");
+					createParticles(
+						otherItems[0].querySelector(".item-icon-container"),
+						temp,
+					);
+				} else {
+					createParticles(
+						bunsenItem.querySelector(".item-icon-container"),
+						temp,
+					);
+				}
+			}
+
+			function stopBoilingEffect() {
+				isHeating = false;
+				clearInterval(particleInterval);
+				const bunsenItem = benchArea.querySelector(
+					'.bench-item[data-name="Bico de Bunsen"]',
+				);
+				if (bunsenItem) {
+					bunsenItem
+						.querySelector(".item-icon")
+						.classList.remove("active-flame");
+				}
+
+				benchArea
+					.querySelectorAll(".heat-haze")
+					.forEach((el) => el.classList.remove("heat-haze"));
+				benchArea.querySelectorAll(".particle").forEach((el) => el.remove());
+			}
+
+			function startFuelFlame() {
+				const fuels = benchArea.querySelectorAll('.bench-item');
+				fuels.forEach(f => {
+					const name = f.dataset.name;
+					if (name && (name.includes("Etanol") || name.includes("Gasolina") || name.includes("Parafina"))) {
+						f.querySelector('.item-icon').classList.add("active-flame");
+						createParticles(f.querySelector('.item-icon-container'), 100, true); // True for soot
+					}
+				});
+			}
+
+			function createParticles(container, temp, isSoot = false) {
+				clearInterval(particleInterval);
+
+				const intensity = Math.max(10, 200 - temp * 1.5);
+
+				particleInterval = setInterval(() => {
+					const particle = document.createElement("div");
+					particle.classList.add("particle");
+
+					const size = Math.random() * (isSoot ? 8 : 6) + 2;
+					particle.style.width = `${size}px`;
+					particle.style.height = `${size}px`;
+
+					if (isSoot && Math.random() > 0.6) {
+						particle.style.backgroundColor = "#333"; // Soot/Smoke
+						particle.style.borderRadius = "2px";
+					}
+
+					const left = Math.random() * 40 + 10;
+					particle.style.left = `${left}px`;
+
+					const duration = Math.random() * (isSoot ? 2 : 1) + 0.5;
+					particle.style.animation = `particle-rise ${duration}s ease-in forwards`;
+
+					container.appendChild(particle);
+
+					setTimeout(() => {
+						if (particle.parentNode) {
+							particle.remove();
+						}
+					}, duration * 1000);
+				}, intensity);
+			}
+
+			clearBtn.addEventListener("click", () => {
+				benchItems = [];
+				stopBoilingEffect();
+				benchArea.classList.remove("bg-green-100", "bg-orange-100", "bg-red-100");
+				clearTimeout(reactionTimeout);
+				updateBenchUI();
+				statusText.innerHTML = "Status: AGUARDANDO INTERAÇÃO...";
+			});
+
+			startBtn.addEventListener("click", () => {
+				if (benchItems.length === 0) {
+					statusText.innerHTML = "Status: AGUARDANDO INTERAÇÃO...";
+					return;
+				}
+
+				clearTimeout(reactionTimeout);
+				const solvent = document.getElementById("solvent-select").value;
+				const currentTemp = parseInt(tempSlider.value);
+
+				// Identify equipment on bench
+				const hasBunsen = benchItems.some(i => i.name.includes("Bunsen"));
+				const hasAgitador = benchItems.some(i => i.name.includes("Agitador"));
+				const hasCondensador = benchItems.some(i => i.name.includes("Condensador"));
+
+				// Find glassware with potential reactions
+				let reactionFound = false;
+
+				for (let i = 0; i < benchItems.length; i++) {
+					const item = benchItems[i];
+					if (item.type !== "glassware") continue;
+
+					const reagents = item.contents;
+					if (reagents.length < 2) continue;
+
+					// 1. Substituição — Metano + Cloro
+					if (reagents.some(r => r.includes("Metano")) && reagents.some(r => r.includes("Cloro"))) {
+						reactionFound = true;
+						if (item.name.includes("Tubo de ensaio") || item.name.includes("Balão")) {
+							statusText.innerHTML = "Status: REAÇÃO EM ANDAMENTO...";
+							reactionTimeout = setTimeout(() => {
+								item.liquidColor = "#FFEB3B";
+								updateBenchUI();
+								statusText.innerHTML = "Status: REAÇÃO CONCLUÍDA — Substituição: CH₄ + Cl₂ → CH₃Cl + HCl";
+							}, 3000);
+						} else {
+							statusText.innerHTML = "⚠️ Esta vidraria não é adequada para este tipo de reação.";
+						}
+						return;
+					}
+
+					// 2. Eliminação — 2-bromobutano + NaOH
+					if (reagents.some(r => r.includes("2-bromobutano")) && reagents.some(r => r.includes("NaOH"))) {
+						reactionFound = true;
+						if (!item.name.includes("Balão") || !hasCondensador) {
+							statusText.innerHTML = "⚠️ Esta vidraria não é adequada para este tipo de reação. Requer Balão de fundo redondo e Condensador (Liebig).";
+							return;
+						}
+						if (!hasBunsen && !hasAgitador && currentTemp < 60) {
+							statusText.innerHTML = "⚠️ Reagentes presentes, mas falta uma fonte de calor (Bico de Bunsen ou Agitador com aquecimento) para iniciar a reação.";
+							return;
+						}
+
+						const concentration = parseFloat(document.getElementById("concentration-slider").value);
+						let duration = 3000;
+						if (concentration < 1.0) {
+							statusText.innerHTML = "⚠️ Concentração baixa — a reação será mais lenta (mecanismo E1 favorecido).";
+							duration = 6000;
+						} else {
+							statusText.innerHTML = "Status: REAÇÃO EM ANDAMENTO...";
+						}
+
+						reactionTimeout = setTimeout(() => {
+							item.liquidColor = "#4CAF50";
+							updateBenchUI();
+							if (solvent.includes("Etanol")) {
+								statusText.innerHTML = `Status: REAÇÃO CONCLUÍDA — Eliminação (${concentration < 1.0 ? "E1" : "E2"}): Formação de Buteno.`;
+							} else {
+								statusText.innerHTML = "Status: REAÇÃO CONCLUÍDA — Substituição (SN2): Formação de Butan-2-ol.";
+							}
+						}, duration);
+						return;
+					}
+
+					// 3. Adição — Etileno + Bromo
+					if (reagents.some(r => r.includes("Etileno")) && reagents.some(r => r.includes("Bromo"))) {
+						reactionFound = true;
+						if (item.name.includes("Erlenmeyer") || item.name.includes("Becker")) {
+							statusText.innerHTML = "Status: REAÇÃO EM ANDAMENTO...";
+							const duration = hasAgitador ? 2000 : 5000;
+							reactionTimeout = setTimeout(() => {
+								item.liquidColor = "#FF9800";
+								updateBenchUI();
+								statusText.innerHTML = "Status: REAÇÃO CONCLUÍDA — Adição: C₂H₄ + Br₂ → C₂H₄Br₂";
+							}, duration);
+						} else {
+							statusText.innerHTML = "⚠️ Esta vidraria não é adequada para este tipo de reação.";
+						}
+						return;
+					}
+				}
+
+				if (!reactionFound) {
+					const hasAnyReag = benchItems.some(i => i.type === "reagent" || (i.type === "glassware" && i.contents.length > 0));
+					if (hasAnyReag) {
+						statusText.innerHTML = "⚠️ Faltam reagentes para esta reação.";
+					} else {
+						statusText.innerHTML = "Status: AGUARDANDO INTERAÇÃO...";
+					}
+				}
+			});
+		});
+	</script>
+</head>
+
+<body class="bg-background text-on-surface font-body-lg h-screen flex flex-col overflow-hidden">
+	<!-- TopNavBar -->
+	<header
+		class="bg-surface text-primary font-title-md border-b border-outline-variant shadow-sm fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-20">
+		<div class="flex items-center gap-4">
+			<button
+				class="flex items-center gap-xs text-on-surface-variant font-body-sm text-body-sm hover:text-primary transition-colors text-secondary font-bold px-2 py-2 mb-md bg-surface/50 backdrop-blur-sm"
+				onclick="window.location.href='dashboard.html'">
+				<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+				Voltar
+			</button>
+
+			<span class="text-xl font-bold text-primary">Laboratório Químico Virtual</span>
+		</div>
+		<div class="flex items-center gap-4">
+			<div class="grid grid-cols-3 gap-6">
+				<!-- Slider Temperatura -->
+				<div class="flex flex-col gap-2">
+					<label class="text-xs uppercase text-on-surface-variant flex justify-between font-bold">
+						Temperatura
+						<span class="text-secondary" id="temp-display">25°C</span>
+					</label>
+					<input class="mt-2" id="temp-slider" max="100" min="0" type="range" value="25" />
+				</div>
+				<!-- Slider Concentração -->
+				<div class="flex flex-col gap-2">
+					<label class="text-xs uppercase text-on-surface-variant flex justify-between font-bold">
+						Concentração (M)
+						<span class="text-secondary" id="concentration-display">1.0</span>
+					</label>
+					<input class="mt-2" max="5" min="0" step="0.1" type="range" value="1.0" id="concentration-slider" />
+				</div>
+				<!-- Seletor Solvente -->
+				<div class="flex flex-col gap-1">
+					<label class="text-xs uppercase text-on-surface-variant font-bold">Solvente</label>
+					<select
+						class="bg-surface border border-outline-variant text-on-surface rounded-md px-3 py-0 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary outline-none"
+						id="solvent-select">
+						<option>Etanol (C₂H₅OH)</option>
+						<option>Água Destilada (H₂O)</option>
+						<option>Hexano (C₆H₁₄)</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Main Workspace -->
+	<main class="flex-1 flex mt-16 overflow-hidden h-[calc(100vh-64px)]">
+		<!-- Left Panel: Inventário (30%) -->
+		<aside
+			class="w-[30%] bg-surface-container-low border-r border-outline-variant flex flex-col shadow-sm z-10 relative">
+			<!-- Header -->
+			<div class="p-6 border-b border-outline-variant bg-surface">
+				<h2 class="text-lg font-bold mb-1 text-primary">Inventário</h2>
+				<p class="text-xs mb-5 uppercase tracking-wider text-on-surface-variant">
+					Materiais de Bancada
+				</p>
+				<div class="flex gap-3">
+
+					<button
+						class="bg-transparent border border-outline text-on-surface px-5 py-2 rounded-full text-xs uppercase font-bold hover:bg-surface-container transition-colors"
+						id="clear-btn">
+						Limpar
+					</button>
+					<button
+						class="bg-secondary text-on-secondary px-5 py-2 rounded-full text-xs uppercase font-bold hover:bg-secondary/90 transition-colors"
+						id="start-btn">
+						Iniciar Mistura
+					</button>
+				</div>
+			</div>
+			<!-- Tabs -->
+			<nav class="flex border-b border-outline-variant text-xs uppercase tracking-wider bg-surface">
+				<button
+					class="tab-btn flex-1 py-3 px-2 text-center text-secondary border-b-2 border-secondary font-bold hover:bg-surface-container-low transition-colors flex flex-col items-center gap-1 opacity-100"
+					data-target="tab-vidrarias">
+					<span class="material-symbols-outlined text-[20px]">science</span>
+					Vidrarias
+				</button>
+				<button
+					class="tab-btn flex-1 py-3 px-2 text-center text-on-surface-variant border-b-2 border-transparent hover:bg-surface-container-low transition-all flex flex-col items-center gap-1 opacity-70"
+					data-target="tab-reagentes">
+					<span class="material-symbols-outlined text-[20px]">opacity</span>
+					Reagentes
+				</button>
+				<button
+					class="tab-btn flex-1 py-3 px-2 text-center text-on-surface-variant border-b-2 border-transparent hover:bg-surface-container-low transition-all flex flex-col items-center gap-1 opacity-70"
+					data-target="tab-equipamentos">
+					<span class="material-symbols-outlined text-[20px]">precision_manufacturing</span>
+					Equipamentos
+				</button>
+			</nav>
+
+			<!-- Tab Contents -->
+			<div class="flex-1 overflow-y-auto custom-scrollbar p-4 bg-surface-container-low/40" id="tab-wrapper">
+
+				<!-- ── Vidrarias Tab ── -->
+				<div class="space-y-2 tab-content" id="tab-vidrarias">
+					<!-- Becker -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Becker (250 ml)" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">science</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">Becker (250 ml)</h3>
+						</div>
+					</div>
+					<!-- Proveta -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Proveta (100 ml)" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">science</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">Proveta (100 ml)</h3>
+						</div>
+					</div>
+					<!-- Erlenmeyer -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Erlenmeyer (125 ml)" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">experiment</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Erlenmeyer (125 ml)
+							</h3>
+						</div>
+					</div>
+					<!-- Tubo de ensaio -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Tubo de ensaio" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">science</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">Tubo de ensaio</h3>
+						</div>
+					</div>
+					<!-- Funil de separação -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Funil de separação" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">filter_alt</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Funil de separação
+							</h3>
+						</div>
+					</div>
+					<!-- Balão fundo redondo -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Balão de fundo redondo (250 ml)" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">science</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Balão de fundo redondo (250 ml)
+							</h3>
+						</div>
+					</div>
+					<!-- Pipeta graduada -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Pipeta graduada (10 ml)" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">science</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Pipeta graduada (10 ml)
+							</h3>
+						</div>
+					</div>
+					<!-- Condensador -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Condensador (Liebig)" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">science</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Condensador (Liebig)
+							</h3>
+						</div>
+					</div>
+					<!-- Placa de Petri -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Placa de Petri" data-type="glassware">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">radio_button_unchecked</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">Placa de Petri</h3>
+						</div>
+					</div>
+				</div>
+
+				<!-- ── Reagentes Tab ── -->
+				<div class="space-y-2 hidden tab-content" id="tab-reagentes">
+
+					<!-- Secção: Substituição -->
+					<h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-2 pt-1 font-bold">
+						Substituição
+					</h4>
+					<div class="grid grid-cols-2 gap-2 mb-4">
+						<!-- Metano -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Metano (CH4)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-secondary-container/40 border border-secondary/30 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[10px] text-secondary leading-tight text-center px-1">CH₄</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Metano</h3>
+							</div>
+						</div>
+
+						<!-- Cloro -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-error transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Cloro (Cl2)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-error-container border border-error/30 flex items-center justify-center shrink-0">
+								<span class="font-bold text-[10px] text-error leading-tight text-center px-1">Cl₂</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Cloro</h3>
+							</div>
+						</div>
+					</div>
+
+					<!-- Secção: Eliminação -->
+					<h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-2 pt-2 font-bold">
+						Eliminação
+					</h4>
+					<div class="grid grid-cols-2 gap-2 mb-4">
+						<!-- 2-Bromobutano -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="2-bromobutano" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-secondary-container/40 border border-secondary/30 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[9px] text-secondary leading-tight text-center px-0.5">C₄H₉Br</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight text-center">
+									2-bromobutano</h3>
+							</div>
+						</div>
+
+						<!-- Hidróxido de Sódio -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-error transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Hidróxido de sódio (NaOH)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-error-container border border-error/30 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[10px] text-error leading-tight text-center px-1">NaOH</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">NaOH</h3>
+							</div>
+						</div>
+					</div>
+
+					<!-- Secção: Adição -->
+					<h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-2 pt-2 font-bold">
+						Adição
+					</h4>
+					<div class="grid grid-cols-2 gap-2 mb-4">
+						<!-- Etileno -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Etileno (C2H4)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-secondary-container/40 border border-secondary/30 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[10px] text-secondary leading-tight text-center px-1">C₂H₄</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Etileno</h3>
+							</div>
+						</div>
+
+						<!-- Bromo -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-error transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Bromo (Br2)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-error-container border border-error/30 flex items-center justify-center shrink-0">
+								<span class="font-bold text-[10px] text-error leading-tight text-center px-1">Br₂</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Bromo</h3>
+							</div>
+						</div>
+					</div>
+
+					<!-- Secção: Outros -->
+					<h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-2 pt-2 font-bold">
+						Outros
+					</h4>
+					<div class="grid grid-cols-2 gap-2 mb-4">
+						<!-- Água -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Água (H2O)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-blue-100 border border-blue-300 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[10px] text-blue-600 leading-tight text-center px-1">H₂O</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Água</h3>
+							</div>
+						</div>
+
+						<!-- Ferro -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-outline transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Ferro (Fe)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-gray-200 border border-gray-400 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[10px] text-gray-700 leading-tight text-center px-1">Fe</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Ferro</h3>
+							</div>
+						</div>
+					</div>
+
+					<!-- Secção: Combustão -->
+					<h4 class="text-xs text-on-surface-variant uppercase tracking-wider mb-2 pt-2 font-bold">
+						Combustão
+					</h4>
+					<div class="grid grid-cols-2 gap-2 mb-4">
+						<!-- Etanol -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-orange-400 transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Etanol Combustível (C2H5OH)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-orange-100 border border-orange-300 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[9px] text-orange-700 leading-tight text-center px-1">C₂H₅OH</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Etanol</h3>
+							</div>
+						</div>
+
+						<!-- Gasolina -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-orange-500 transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Gasolina (C8H18)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-yellow-100 border border-orange-400 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[9px] text-orange-900 leading-tight text-center px-1">C₈H₁₈</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Gasolina</h3>
+							</div>
+						</div>
+
+						<!-- Parafina -->
+						<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-2 hover:shadow-md hover:border-orange-300 transition-all cursor-pointer flex flex-col items-center text-center gap-2"
+							data-name="Parafina (C25H52)" data-type="reagent">
+							<div
+								class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0">
+								<span
+									class="font-bold text-[9px] text-gray-400 leading-tight text-center px-1">PARAFA</span>
+							</div>
+							<div class="min-w-0">
+								<h3 class="font-bold text-on-surface text-[12px] leading-tight">Parafina</h3>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				<!-- ── Equipamentos Tab ── -->
+				<div class="space-y-2 hidden tab-content" id="tab-equipamentos">
+					<!-- Suporte universal -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Suporte universal com garra" data-type="equipment">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">build</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Suporte universal com garra
+							</h3>
+						</div>
+					</div>
+					<!-- Bico de Bunsen -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Bico de Bunsen" data-type="equipment">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">local_fire_department</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">Bico de Bunsen</h3>
+						</div>
+					</div>
+					<!-- Agitador magnético -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Agitador magnético com aquecimento" data-type="equipment">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">settings_input_component</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">
+								Agitador magnético com aquecimento
+							</h3>
+						</div>
+					</div>
+					<!-- Balança analítica -->
+					<div class="draggable-item group bg-surface border border-outline-variant rounded-lg p-3 hover:shadow-md hover:border-secondary transition-all cursor-pointer flex items-center gap-4"
+						data-name="Balança analítica" data-type="equipment">
+						<div
+							class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+							<span
+								class="material-symbols-outlined text-[28px] text-on-surface-variant group-hover:text-secondary">scale</span>
+						</div>
+						<div>
+							<h3 class="font-semibold text-on-surface">Balança analítica</h3>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</aside>
+
+		<!-- Right Panel: Bancada de Laboratório (70%) -->
+		<section class="w-[70%] relative flex flex-col bg-background overflow-hidden">
+			<!-- Subtle dot pattern -->
+			<div class="absolute inset-0 pointer-events-none opacity-[0.04]" style="
             background-image: radial-gradient(
               circle at 1px 1px,
               #1a1c1c 1px,
               transparent 0
             );
             background-size: 24px 24px;
-          "
-        ></div>
+          "></div>
 
-        <!-- Workbench Canvas Area -->
-        <div
-          class="flex-1 relative flex items-center justify-center transition-colors duration-[3000ms] ease-in-out overflow-hidde"
-          id="bench-area"
-        >
-          <!-- Placeholder -->
-          <div
-            class="w-64 h-64 border-2 border-dashed border-outline-variant rounded-full flex flex-col items-center justify-center text-on-surface-variant bg-surface-container-low/60"
-          >
-            <span
-              class="material-symbols-outlined text-[48px] mb-2 text-outline"
-              data-icon="add_circle"
-              >add_circle</span
-            >
-            <span class="font-body-sm text-body-sm text-center px-4 text-on-surface-variant"
-              >Clique nos materiais para adicionar à bancada</span
-            >
-          </div>
-        </div>
+			<!-- Workbench Canvas Area -->
+			<div class="flex-1 relative transition-colors duration-[3000ms] ease-in-out overflow-auto p-8"
+				id="bench-area" style="min-width: 100%; min-height: 100%;">
+				<!-- Virtual Space Extender (to allow scrolling everywhere) -->
+				<div style="position: absolute; width: 3000px; height: 3000px; pointer-events: none;"></div>
 
-        <!-- Bottom Control Bar -->
-        <div
-          class="absolute top-2 left-1/2 transform -translate-x-1/2 w-[90%] max-w-3xl bg-surface/95 backdrop-blur-md border border-outline-variant shadow-lg rounded-xl p-6 flex flex-col gap-4"
-        >
-          <div
-            class="flex justify-between items-center mb-2 border-b border-outline-variant pb-4"
-          >
-            <h3 class="text-lg font-bold text-primary">Controle de Reação</h3>
-            <div class="flex gap-3">
-              <button
-                class="bg-transparent border border-outline text-on-surface px-5 py-2 rounded-full text-xs uppercase font-bold hover:bg-surface-container transition-colors"
-                id="clear-btn"
-              >
-                Limpar
-              </button>
-              <button
-                class="bg-secondary text-on-secondary px-5 py-2 rounded-full text-xs uppercase font-bold hover:bg-secondary/90 transition-colors"
-                id="start-btn"
-              >
-                Iniciar Mistura
-              </button>
-            </div>
-          </div>
-          <div class="grid grid-cols-3 gap-6">
-            <!-- Slider Temperatura -->
-            <div class="flex flex-col gap-2">
-              <label
-                class="text-xs uppercase text-on-surface-variant flex justify-between font-bold"
-              >
-                Temperatura
-                <span class="text-secondary" id="temp-display">25°C</span>
-              </label>
-              <input
-                class="mt-2"
-                id="temp-slider"
-                max="100"
-                min="0"
-                type="range"
-                value="25"
-              />
-            </div>
-            <!-- Slider Concentração -->
-            <div class="flex flex-col gap-2">
-              <label
-                class="text-xs uppercase text-on-surface-variant flex justify-between font-bold"
-              >
-                Concentração (M)
-                <span class="text-secondary">1.0</span>
-              </label>
-              <input
-                class="mt-2"
-                max="5"
-                min="0"
-                step="0.1"
-                type="range"
-                value="1.0"
-              />
-            </div>
-            <!-- Seletor Solvente -->
-            <div class="flex flex-col gap-2">
-              <label class="text-xs uppercase text-on-surface-variant font-bold"
-                >Solvente</label
-              >
-              <select
-                class="bg-surface border border-outline-variant text-on-surface rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary outline-none"
-              >
-                <option>Água Destilada (H₂O)</option>
-                <option>Etanol (C₂H₅OH)</option>
-                <option>Hexano (C₆H₁₄)</option>
-              </select>
-            </div>
-          </div>
-        </div>
+				<!-- Items Container -->
+				<div id="bench-items-container" class="absolute inset-0"></div>
 
-        <!-- Reaction Legend / Footer -->
-        <div
-          class="absolute bottom-0 w-full bg-surface/90 backdrop-blur-sm border-t border-outline-variant px-6 py-3 flex justify-between items-center text-xs uppercase text-on-surface-variant font-bold z-20"
-        >
-          <div class="flex items-center gap-4">
-            <span class="flex items-center gap-2"
-              ><span
-                class="w-3 h-3 rounded-full bg-secondary inline-block"
-              ></span>
-              Seguro</span
-            >
-            <span class="flex items-center gap-2"
-              ><span
-                class="w-3 h-3 rounded-full bg-error inline-block"
-              ></span>
-              Volátil</span
-            >
-          </div>
-          <div id="status-text">Status: Aguardando interação...</div>
-        </div>
-      </section>
-    </main>
-  </body>
+				<!-- Placeholder (Centered when empty) -->
+				<div class="absolute inset-0 flex items-center justify-center pointer-events-none"
+					id="bench-placeholder">
+					<div
+						class="w-64 h-64 border-2 border-dashed border-outline-variant rounded-full flex flex-col items-center justify-center text-on-surface-variant bg-surface-container-low/60">
+						<span class="material-symbols-outlined text-[48px] mb-2 text-outline"
+							data-icon="add_circle">add_circle</span>
+						<span class="font-body-sm text-body-sm text-center px-4 text-on-surface-variant">Clique nos
+							materiais para
+							adicionar à bancada</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Bottom Control Bar -->
+			<!-- <div
+				class="absolute top-20 left-1/2 transform -translate-x-1/2 w-[90%] max-w-3xl bg-surface/95 backdrop-blur-md border border-outline-variant shadow-lg rounded-xl p-6 flex flex-col gap-4">
+				<div class="flex justify-between items-center mb-2 border-b border-outline-variant pb-4">
+					<h3 class="text-lg font-bold text-primary">Controle de Reação</h3>
+				</div>
+			</div> -->
+
+			<!-- Reaction Legend / Footer -->
+			<div
+				class="absolute bottom-0 w-full bg-surface/90 backdrop-blur-sm border-t border-outline-variant px-6 py-3 flex justify-between items-center text-xs uppercase text-on-surface-variant font-bold z-20">
+				<div class="flex items-center gap-4">
+					<span class="flex items-center gap-2"><span
+							class="w-3 h-3 rounded-full bg-secondary inline-block"></span>
+						Seguro</span>
+					<span class="flex items-center gap-2"><span
+							class="w-3 h-3 rounded-full bg-error inline-block"></span>
+						Volátil</span>
+				</div>
+				<div id="status-text">Status: Aguardando interação...</div>
+			</div>
+		</section>
+	</main>
+	<div id="volume-modal"
+		class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+		<div class="bg-surface p-6 rounded-xl shadow-2xl border border-outline-variant w-full max-w-sm">
+			<h3 id="modal-title" class="text-lg font-bold text-primary mb-4">Título</h3>
+			<div class="flex flex-col gap-2 mb-6">
+				<label class="text-xs font-bold uppercase text-on-surface-variant">Quantidade (<span
+						id="modal-unit">mL</span>)</label>
+				<input type="number" id="modal-input"
+					class="w-full bg-surface-container border border-outline-variant rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-secondary"
+					value="50">
+				<p id="modal-warning" class="text-[10px] text-error font-bold hidden"></p>
+			</div>
+			<div class="flex gap-3 justify-end">
+				<button id="modal-cancel"
+					class="px-4 py-2 text-xs font-bold uppercase text-on-surface-variant hover:bg-surface-container rounded-lg">Cancelar</button>
+				<button id="modal-confirm"
+					class="px-4 py-2 text-xs font-bold uppercase bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors">Confirmar</button>
+			</div>
+		</div>
+	</div>
+</body>
+
 </html>
